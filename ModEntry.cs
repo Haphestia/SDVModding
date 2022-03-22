@@ -7,7 +7,7 @@ namespace SDVFactory
     {
         public override void Entry(IModHelper helper)
         {
-            Monitor.Log("Hello world from Factory!", LogLevel.Alert);
+            Factory.FactoryGame.Initialize(helper, Monitor);
         }
     }
 }
