@@ -20,7 +20,7 @@
  meaning you can still create your own private networks of minecarts using other mods or
  techniques, and this mod should not interfere with them.
  
- * Editing vanilla minecarts
+ * Editing vanilla minecarts  
  The vanilla minecarts have been reimplemented using content entries. The following keys
  pertain to the vanilla carts: "jsonminecarts.busstop", "jsonminecarts.town", 
  "jsonminecarts.mines", and "jsonminecarts.quarry". They make use of an optional parameter,
