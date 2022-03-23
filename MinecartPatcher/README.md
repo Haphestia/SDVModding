@@ -3,7 +3,7 @@
  
  * What does it do?  
  It replaces the minecart destination menu with a nearly identical clone, which
- operates based on simple JSON data. You can use content patcher to add new minecarts,
+ operates based on simple content data. You can use content patcher to add new minecarts,
  or edit the vanilla minecarts.
  
  * How does it work?  
@@ -22,8 +22,8 @@
  
  * Editing vanilla minecarts  
  The vanilla minecarts have been reimplemented using content entries. The following keys
- pertain to the vanilla carts: "jsonminecarts.busstop", "jsonminecarts.town", 
- "jsonminecarts.mines", and "jsonminecarts.quarry". They make use of an optional parameter,
+ pertain to the vanilla carts: "minecartpatcher.busstop", "minecartpatcher.town", 
+ "minecartpatcher.mines", and "minecartpatcher.quarry". They make use of an optional parameter,
  VanillaPassthrough, which causes the minecart to pass this string as a vanilla dialogue 
  response key, triggering the game's native handling, e.g. "Minecart_Bus". If the 
  VanillaPassthrough parameter is present, the LandingPoint and LocationName are ignored. 
