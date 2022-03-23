@@ -1,5 +1,3 @@
-# SDVFactory
- Bringing industrial automation to Stardew Valley.  
-  
- Still in early development. Do not (try to) use this yet.  
- Created by bwdy & Glitchfinder
+# SDVModding
+ These are mods for Stardew Valley.  
+ Vaguely.  
