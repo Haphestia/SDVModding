@@ -5,27 +5,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace JsonMinecarts
+namespace MinecartPatcher
 {
     public class ModEntry : StardewModdingAPI.Mod
     {
 		public Dictionary<string, MinecartInstance> Minecarts;
 
-		//landing point needs to be within 5 tiles of the minecart for detections to work correctly.
-		//multiple minecarts on the same map should be at least 15 tiles apart.
 		private int LastPage = 0;
 		private int PageCount = 0;
 
 		public override void Entry(IModHelper helper)
         {
 			helper.Content.AssetLoaders.Add(new AssetLoader());
-			new JMCModHooks(this);
+			new MCPModHooks(this);
 			helper.Events.GameLoop.DayStarted += (obj, dsea) => LoadData();
 		}
 
 		public void LoadData()
         {
-			Minecarts = Helper.Content.Load<Dictionary<string, MinecartInstance>>("JsonMinecarts.Minecarts", ContentSource.GameContent);
+			Minecarts = Helper.Content.Load<Dictionary<string, MinecartInstance>>("MinecartPatcher.Minecarts", ContentSource.GameContent);
 		}
 
         public bool OnMinecartActivation(GameLocation l, Vector2 vec)
@@ -51,7 +49,7 @@ namespace JsonMinecarts
 		{
 			LoadData();
 			List<Response> responses = new List<Response>();
-			if(page > 0) responses.Add(new Response("JMC.PaginationMinus", "@ Previous Page"));
+			if(page > 0) responses.Add(new Response("MCP.PaginationMinus", "@ Previous Page"));
 			int counter = 0;
 			int startCount = (page * 4) + 2;
 			if (page == 0) startCount -= 2;
@@ -68,7 +66,7 @@ namespace JsonMinecarts
 
 			}
 			PageCount = counter / 4;
-			if (page < PageCount - 1) responses.Add(new Response("JMC.PaginationPlus", "Next Page >"));
+			if (page < PageCount - 1) responses.Add(new Response("MCP.PaginationPlus", "Next Page >"));
 			responses.Add(new Response("Cancel", Game1.content.LoadString("Strings\\Locations:MineCart_Destination_Cancel")));
 			LastPage = page;
 			Game1.activeClickableMenu = new DialogueBox(this, responses);
@@ -79,12 +77,12 @@ namespace JsonMinecarts
 		public bool onDialogueSelect(string key)
         {
 			if (key == "Cancel") return true;
-			if (key == "JMC.PaginationMinus")
+			if (key == "MCP.PaginationMinus")
             {
 				drawMinecartDialogue(Game1.player.currentLocation, Math.Max(0, LastPage - 1));
 				return true;
             }
-			if (key == "JMC.PaginationPlus")
+			if (key == "MCP.PaginationPlus")
 			{
 				drawMinecartDialogue(Game1.player.currentLocation, Math.Min(PageCount - 1, LastPage + 1));
 				return true;

@@ -8,7 +8,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SDVFactory", "SDVFactory\SD
 		{D8FBB5AA-1C31-401D-A634-BFD068108E4C} = {D8FBB5AA-1C31-401D-A634-BFD068108E4C}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonMinecarts", "JsonMinecarts\JsonMinecarts.csproj", "{D8FBB5AA-1C31-401D-A634-BFD068108E4C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinecartPatcher", "MinecartPatcher\MinecartPatcher.csproj", "{D8FBB5AA-1C31-401D-A634-BFD068108E4C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

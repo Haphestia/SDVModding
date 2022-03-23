@@ -3,7 +3,7 @@ using StardewValley;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace JsonMinecarts
+namespace MinecartPatcher
 {
     internal class DialogueBox : StardewValley.Menus.DialogueBox
     {

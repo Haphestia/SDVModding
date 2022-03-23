@@ -7,14 +7,14 @@ using System.Reflection;
 using System.Threading.Tasks;
 using xTile.Dimensions;
 
-namespace JsonMinecarts
+namespace MinecartPatcher
 {
-    public class JMCModHooks : ModHooks
+    public class MCPModHooks : ModHooks
     {
 		ModHooks alias;
 		ModEntry modEntry;
 
-		public JMCModHooks(ModEntry mod)
+		public MCPModHooks(ModEntry mod)
         {
 			modEntry = mod;
 			var field = typeof(Game1).GetField("hooks", BindingFlags.Static | BindingFlags.NonPublic);

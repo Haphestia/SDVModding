@@ -1,4 +1,4 @@
-﻿namespace JsonMinecarts
+﻿namespace MinecartPatcher
 {
     public class MinecartInstance
     {
