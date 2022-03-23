@@ -1,20 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace JsonMinecarts
+﻿namespace JsonMinecarts
 {
     public class MinecartInstance
     {
-        /// <summary>
-        /// A unique id for this warp. Required for internal functionality.
-        /// Suggestion: modname.cartlocation
-        /// Example: mysupermart.walkinfreezer1
-        /// </summary>
-        public string UniqueId { get; set; } = string.Empty;
-
         /// <summary>
         /// The internal map Name, used to locate warp target.
         /// </summary>
