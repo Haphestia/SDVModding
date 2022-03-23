@@ -53,3 +53,17 @@
     ]
  }
  ```
+ 
+ * Possible fields  
+ LocationName - A string. The internal map Name, used to locate warp target.  
+ DisplayName - A string. The display name that will appear in the destination selection menu.  
+ LandingPointX - An integer, the x tile coordinate the player should arrive at. Needs to be within 5 tiles of the cart.  
+ LandingPointY - An integer, the y tile coordinate the player should arrive at. Needs to be within 5 tiles of the cart.  
+ LandingPointDirection - An integer, the direction id the player should arrive facing.  
+ IsUnderground - A boolean. Causes the game to treat this like the mines, muting the music under certain circumstances.  
+ MailCondition - A string.  The mail flag ID to test for, e.g. "ccCraftsRoom" used for the vanilla Quarry cart.  
+ VanillaPassthrough - A string. Instead of warping the player, it will pass this as a dialogue response to the vanilla
+ handler. Used to reimplement vanilla carts in case other mods have changed their behavior.  
+
+ * License  
+ License is MIT. Go ham.
