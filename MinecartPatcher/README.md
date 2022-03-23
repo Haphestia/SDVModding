@@ -64,6 +64,8 @@
  MailCondition - A string.  The mail flag ID to test for, e.g. "ccCraftsRoom" used for the vanilla Quarry cart.  
  VanillaPassthrough - A string. Instead of warping the player, it will pass this as a dialogue response to the vanilla
  handler. Used to reimplement vanilla carts in case other mods have changed their behavior.  
+ NetworkId - A string. If not provided, this cart will connect to the vanilla network. If provided, it will only  
+ connect to other carts with the same NetworkId string.  
 
  * License  
  License is MIT. Go ham.

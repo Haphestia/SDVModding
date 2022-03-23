@@ -49,9 +49,10 @@ namespace MinecartPatcher
 
 		public override bool OnGameLocation_CheckAction(GameLocation location, Location tileLocation, xTile.Dimensions.Rectangle viewport, Farmer who, Func<bool> action)
 		{
-			if (modEntry.IsMinecart(location, new Vector2(tileLocation.X, tileLocation.Y)))
+			var mc = modEntry.FindMinecart(location, new Vector2(tileLocation.X, tileLocation.Y));
+			if (mc != null)
             {
-				modEntry.OnMinecartActivation(location, new Vector2(tileLocation.X, tileLocation.Y));
+				modEntry.OnMinecartActivation(mc, location, new Vector2(tileLocation.X, tileLocation.Y));
 				return true;
             }
 			return alias.OnGameLocation_CheckAction(location, tileLocation, viewport, who, action);

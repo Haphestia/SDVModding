@@ -43,5 +43,11 @@
         /// Might be useful if the game has updated or someone has extended the vanilla minecart stuff.
         /// </summary>
         public string VanillaPassthrough { get; set; } = null;
+
+        /// <summary>
+        /// If ommitted, a minecart will connect to the vanilla minecart network. You can specify a network id here, which will
+        /// cause the minecart to only connect to other minecarts with this network id.
+        /// </summary>
+        public string NetworkId { get; set; } = null;
     }
 }

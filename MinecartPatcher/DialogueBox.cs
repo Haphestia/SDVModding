@@ -9,8 +9,10 @@ namespace MinecartPatcher
     {
         private ModEntry Mod;
 		private MethodInfo tryOutro;
-        public DialogueBox(ModEntry mod, List<Response> responses) : base(Game1.content.LoadString("Strings\\Locations:MineCart_ChooseDestination"), responses)
+		private MinecartInstance activeCart;
+        public DialogueBox(MinecartInstance mc, ModEntry mod, List<Response> responses) : base(Game1.content.LoadString("Strings\\Locations:MineCart_ChooseDestination"), responses)
         {
+			activeCart = mc;
             Mod = mod;
 			tryOutro = typeof(StardewValley.Menus.DialogueBox).GetMethod("tryOutro", BindingFlags.NonPublic | BindingFlags.Instance);
         }
@@ -31,7 +33,7 @@ namespace MinecartPatcher
 				{
 					foreach (Response response2 in responses)
 					{
-						if (response2.hotkey == key && Mod.onDialogueSelect(response2.responseKey))
+						if (response2.hotkey == key && Mod.onDialogueSelect(activeCart, response2.responseKey))
 						{
 							Game1.playSound("smallSelect");
 							selectedResponse = -1;
@@ -42,7 +44,7 @@ namespace MinecartPatcher
 				}
 				if (Game1.options.doesInputListContain(Game1.options.menuButton, key) || key == Keys.N)
 				{
-					if (responses != null && responses.Count > 0 && Mod.onDialogueSelect(responses[responses.Count - 1].responseKey))
+					if (responses != null && responses.Count > 0 && Mod.onDialogueSelect(activeCart, responses[responses.Count - 1].responseKey))
 					{
 						Game1.playSound("smallSelect");
 					}
@@ -86,7 +88,7 @@ namespace MinecartPatcher
 				transitionInitialized = false;
 				transitioningBigger = true;
 				Game1.dialogueUp = false;
-				if (Mod.onDialogueSelect(responses[selectedResponse].responseKey))
+				if (Mod.onDialogueSelect(activeCart, responses[selectedResponse].responseKey))
 				{
 					Game1.playSound("smallSelect");
 				}

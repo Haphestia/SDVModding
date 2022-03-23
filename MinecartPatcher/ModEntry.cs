@@ -26,13 +26,13 @@ namespace MinecartPatcher
 			Minecarts = Helper.Content.Load<Dictionary<string, MinecartInstance>>("MinecartPatcher.Minecarts", ContentSource.GameContent);
 		}
 
-        public bool OnMinecartActivation(GameLocation l, Vector2 vec)
+        public bool OnMinecartActivation(MinecartInstance mc, GameLocation l, Vector2 vec)
         {
 			if (Game1.player.mount != null) return true;
 			if (Game1.MasterPlayer.mailReceived.Contains("ccBoilerRoom")) {
 				if (!Game1.player.isRidingHorse() || Game1.player.mount == null)
 				{
-					drawMinecartDialogue(l, 0);
+					drawMinecartDialogue(mc, l, 0);
 					return true;
 				}
 				Game1.player.mount.checkAction(Game1.player, l);
@@ -45,7 +45,7 @@ namespace MinecartPatcher
 			return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
         }
 
-		public void drawMinecartDialogue(GameLocation l, int page)
+		public void drawMinecartDialogue(MinecartInstance src, GameLocation l, int page)
 		{
 			LoadData();
 			List<Response> responses = new List<Response>();
@@ -56,6 +56,7 @@ namespace MinecartPatcher
 			int endCount = ((page + 1) * 4) + 1;
 			foreach(var mc in Minecarts.OrderBy(x => x.Value.DisplayName))
             {
+				if (mc.Value.NetworkId != src.NetworkId) continue;
 				if (mc.Value.LocationName == l.Name)
 				{
 					if (RawDistance(mc.Value.LandingPointX, mc.Value.LandingPointY, Game1.player.getTileX(), Game1.player.getTileY()) < 6) continue;
@@ -69,22 +70,22 @@ namespace MinecartPatcher
 			if (page < PageCount - 1) responses.Add(new Response("MCP.PaginationPlus", "Next Page >"));
 			responses.Add(new Response("Cancel", Game1.content.LoadString("Strings\\Locations:MineCart_Destination_Cancel")));
 			LastPage = page;
-			Game1.activeClickableMenu = new DialogueBox(this, responses);
+			Game1.activeClickableMenu = new DialogueBox(src, this, responses);
 			Game1.dialogueUp = true;
 			Game1.player.CanMove = false;
 		}
 
-		public bool onDialogueSelect(string key)
+		public bool onDialogueSelect(MinecartInstance src, string key)
         {
 			if (key == "Cancel") return true;
 			if (key == "MCP.PaginationMinus")
             {
-				drawMinecartDialogue(Game1.player.currentLocation, Math.Max(0, LastPage - 1));
+				drawMinecartDialogue(src, Game1.player.currentLocation, Math.Max(0, LastPage - 1));
 				return true;
             }
 			if (key == "MCP.PaginationPlus")
 			{
-				drawMinecartDialogue(Game1.player.currentLocation, Math.Min(PageCount - 1, LastPage + 1));
+				drawMinecartDialogue(src, Game1.player.currentLocation, Math.Min(PageCount - 1, LastPage + 1));
 				return true;
 			}
 			if (!Minecarts.ContainsKey(key)) return true;
@@ -93,9 +94,9 @@ namespace MinecartPatcher
 			return true;
 		}
 
-		public bool IsMinecart(GameLocation l, Vector2 vec)
+		public MinecartInstance FindMinecart(GameLocation l, Vector2 vec)
         {
-			if (l == null || string.IsNullOrWhiteSpace(l.Name)) return false;
+			if (l == null || string.IsNullOrWhiteSpace(l.Name)) return null;
             var tids = new List<int>{ 958, 1080, 1081 };
             int tid = l.getTileIndexAt(Utility.Vector2ToPoint(vec), "Buildings");
             if (tids.Contains(tid))
@@ -104,11 +105,11 @@ namespace MinecartPatcher
 				foreach(var mc in Minecarts.Where(mc => mc.Value.LocationName == l.Name))
                 {
 					if(RawDistance(mc.Value.LandingPointX, mc.Value.LandingPointY, (int)vec.X, (int)vec.Y) < 6){
-						return true; //found it!
+						return mc.Value; //found it!
                     }
                 }
             }
-			return false;
+			return null;
         }
 
         public void WarpFarmer(MinecartInstance mc)
