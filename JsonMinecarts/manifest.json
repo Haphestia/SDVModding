@@ -1,0 +1,10 @@
+﻿{
+  "Name": "JsonMinecarts",
+  "Author": "bwdy",
+  "Version": "1.0.0",
+  "Description": "My minecart brings all the farmers to the yard...",
+  "UniqueID": "bwdymods.jsonminecarts",
+  "EntryDll": "JsonMinecarts.dll",
+  "MinimumApiVersion": "3.0.0",
+  "UpdateKeys": []
+}
