@@ -16,49 +16,23 @@ namespace SDVFactory.Factory
     {
         internal static Logger Logger;
         internal static int NextMachineId = 0;
-        internal static Harmony Harmony;
         internal static IModHelper Helper;
 
-        public static void Initialize(Harmony harmony, IModHelper helper, IMonitor monitor)
+        public static FactoryWorld World;
+
+        public static void Initialize(IModHelper helper, IMonitor monitor)
         {
             Helper = helper;
             Logger = new Logger(monitor);
-            Logger.Info("Hello from Factory! Mod initialized okay.");
-
-            harmony.Patch(
-               original: AccessTools.Method(typeof(Furniture), nameof(Furniture.draw), new Type[] { typeof(SpriteBatch), typeof(int), typeof(int), typeof(float)}),
-               prefix: new HarmonyMethod(typeof(FurniturePatch), nameof(FurniturePatch.DrawPrefix))
-            );
-            harmony.Patch(
-               original: AccessTools.Method(typeof(StardewValley.Object), nameof(StardewValley.Object.getCategoryColor)),
-               postfix: new HarmonyMethod(typeof(FurniturePatch), nameof(FurniturePatch.CategoryColorPostfix))
-            );
-            harmony.Patch(
-               original: AccessTools.Method(typeof(StardewValley.Object), nameof(StardewValley.Object.getCategoryName)),
-               postfix: new HarmonyMethod(typeof(FurniturePatch), nameof(FurniturePatch.CategoryNamePostfix))
-            );
 
             Action<string,string[]> act = (a, b) =>
             {
-                //give the player a free test machine
-                var f = new Furniture("Factory.FurnitureTest", Microsoft.Xna.Framework.Vector2.Zero);
-                NextMachineId++;
-                f.modData.Add("FactoryMod", "true");
-                f.modData.Add("FactoryId", NextMachineId.ToString());
-                f.ParentSheetIndex = 2;
-                Game1.player.addItemByMenuIfNecessary(f);
+                Game1.player.addItemByMenuIfNecessary(Machines.Machine.CreateOne());
             };
             helper.ConsoleCommands.Add("test", "Adds test machines", act);
-        }
 
-        //return true to consume action check
-        public static bool CheckFurnitureAction(GameLocation l, Farmer who, Furniture f, Location vect)
-        {
-            if (f.modData.ContainsKey("FactoryMod"))
-            {
-                Logger.Alert("furniture happened: " + f.Name + " :: " + f.modData["FactoryId"]);
-            }
-            return false;
+            //todo: load me
+            World = new FactoryWorld();
         }
 
         //return true to suppress vanilla checks
@@ -68,7 +42,18 @@ namespace SDVFactory.Factory
             {
                 if (f.boundingBox.Value.Contains((int)(vect.X * 64f), (int)(vect.Y * 64f)) && f.furniture_type.Value != 12)
                 {
-                    if (CheckFurnitureAction(l, who, f, vect)) return true;
+                    if (f.modData.ContainsKey("FactoryMod") && f.modData.ContainsKey("FactoryId"))
+                    {
+                        string s = f.modData["FactoryId"];
+                        if (!string.IsNullOrEmpty(s))
+                        {
+                            if(long.TryParse(s, out long mid))
+                            {
+                                World.ActivateMachine(l, who, f, vect, mid);
+                                return true;
+                            }
+                        }
+                    }
                 }
             }
             return false;

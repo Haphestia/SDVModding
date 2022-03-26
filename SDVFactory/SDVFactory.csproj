@@ -10,19 +10,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Factory.tmx">
+    <None Update="Assets\Factory.tmx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="factorytiles.png">
+    <None Update="Assets\factorytiles.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Mines\mine.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="paths.png">
+    <None Update="Assets\paths.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Update="testmachine.png">
+    <None Update="Assets\testmachine.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

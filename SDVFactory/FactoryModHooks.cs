@@ -12,11 +12,9 @@ namespace SDVFactory
 	public class FactoryModHooks : ModHooks
 	{
 		ModHooks alias;
-		ModEntry modEntry;
 
-		public FactoryModHooks(ModEntry mod)
+		public FactoryModHooks()
 		{
-			modEntry = mod;
 			var field = typeof(Game1).GetField("hooks", BindingFlags.Static | BindingFlags.NonPublic);
 			alias = (ModHooks)field.GetValue(null);
 			field.SetValue(null, this);

@@ -2,19 +2,33 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Netcode;
+using SDVFactory.Factory;
 using StardewValley;
 using StardewValley.Objects;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SDVFactory.Factory
+namespace SDVFactory
 {
-    public static class FurniturePatch
+    internal static class Harmony
     {
-        public static string CategoryNamePostfix(string __result, StardewValley.Object __instance)
+        internal static void Patch()
+        {
+            var harmony = new HarmonyLib.Harmony("bwdy.FactoryMod");
+            harmony.Patch(
+               original: AccessTools.Method(typeof(Furniture), nameof(Furniture.draw), new Type[] { typeof(SpriteBatch), typeof(int), typeof(int), typeof(float) }),
+               prefix: new HarmonyMethod(typeof(Harmony), nameof(Furniture_draw_Pre))
+            );
+            harmony.Patch(
+               original: AccessTools.Method(typeof(StardewValley.Object), nameof(StardewValley.Object.getCategoryColor)),
+               postfix: new HarmonyMethod(typeof(Harmony), nameof(Object_getCategoryColor_Post))
+            );
+            harmony.Patch(
+               original: AccessTools.Method(typeof(StardewValley.Object), nameof(StardewValley.Object.getCategoryName)),
+               postfix: new HarmonyMethod(typeof(Harmony), nameof(Object_getCategoryName_Post))
+            );
+        }
+
+        public static string Object_getCategoryName_Post(string __result, StardewValley.Object __instance)
         {
             if (__instance is Furniture)
             {
@@ -27,20 +41,20 @@ namespace SDVFactory.Factory
             return __result;
         }
 
-        public static Color CategoryColorPostfix(Color __result, StardewValley.Object __instance)
+        public static Color Object_getCategoryColor_Post(Color __result, StardewValley.Object __instance)
         {
-            if(__instance is Furniture)
+            if (__instance is Furniture)
             {
                 var f = __instance as Furniture;
                 if (f.modData.ContainsKey("FactoryMod"))
                 {
                     return Color.DarkOrange;
-                } 
+                }
             }
             return __result;
         }
 
-        public static bool DrawPrefix(Furniture __instance, SpriteBatch spriteBatch, int x, int y, float alpha = 1f)
+        public static bool Furniture_draw_Pre(Furniture __instance, SpriteBatch spriteBatch, int x, int y, float alpha = 1f)
         {
             //todo, readd custom texture here
             //todo, make a machine class to simplify this stuff

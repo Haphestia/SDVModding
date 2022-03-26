@@ -66,15 +66,15 @@ namespace SDVFactory
         {
             if (asset.Name.IsEquivalentTo("FactoryMod.MapFactory"))
             {
-                return Mod.Helper.Content.Load<T>("Factory.tmx", ContentSource.ModFolder);
+                return Mod.Helper.Content.Load<T>("Assets/Factory.tmx", ContentSource.ModFolder);
             }
             else if (asset.Name.IsEquivalentTo("FactoryMod.MapFactory"))
             {
-                return Mod.Helper.Content.Load<T>("factorytiles.png", ContentSource.ModFolder);
+                return Mod.Helper.Content.Load<T>("Assets/factorytiles.png", ContentSource.ModFolder);
             }
             else if (asset.Name.IsEquivalentTo("machines.test"))
             {
-                return Mod.Helper.Content.Load<T>("testmachine.png", ContentSource.ModFolder);
+                return Mod.Helper.Content.Load<T>("Assets/testmachine.png", ContentSource.ModFolder);
             }
             throw new InvalidOperationException($"Unexpected asset '{asset.Name}'.");
         }
