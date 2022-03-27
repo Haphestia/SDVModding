@@ -1,4 +1,5 @@
 ﻿using StardewModdingAPI;
+using SDVFactory.Hooks;
 
 namespace SDVFactory
 {
@@ -6,13 +7,11 @@ namespace SDVFactory
     {
         public override void Entry(IModHelper helper)
         {
-            new FactoryModHooks();
+            ModHooks.Patch();
             Harmony.Patch();
-
-            var am = new AssetManager(this);
-            helper.Content.AssetLoaders.Add(am);
-            helper.Content.AssetEditors.Add(am);
-            Factory.FactoryGame.Initialize(helper, Monitor);
+            Assets.Patch(this);
+            Misc.Patch();
+            FGame.Initialize(this);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework.Input;
 using StardewValley;
 using StardewValley.Events;
 using System;
@@ -7,16 +6,18 @@ using System.Reflection;
 using System.Threading.Tasks;
 using xTile.Dimensions;
 
-namespace SDVFactory
+namespace SDVFactory.Hooks
 {
-	public class FactoryModHooks : ModHooks
+	public class ModHooks : StardewValley.ModHooks
 	{
-		ModHooks alias;
+        StardewValley.ModHooks alias;
 
-		public FactoryModHooks()
+		public static void Patch() => new ModHooks();
+
+		public ModHooks()
 		{
 			var field = typeof(Game1).GetField("hooks", BindingFlags.Static | BindingFlags.NonPublic);
-			alias = (ModHooks)field.GetValue(null);
+            alias = (StardewValley.ModHooks)field.GetValue(null);
 			field.SetValue(null, this);
 		}
 
@@ -47,10 +48,7 @@ namespace SDVFactory
 
 		public override bool OnGameLocation_CheckAction(GameLocation location, Location tileLocation, xTile.Dimensions.Rectangle viewport, Farmer who, Func<bool> action)
 		{
-			if(Factory.FactoryGame.CheckAction(location, who, tileLocation))
-            {
-				return true;
-            }
+			if(FGame.CheckAction(location, who, tileLocation)) return true;
 			return alias.OnGameLocation_CheckAction(location, tileLocation, viewport, who, action);
 		}
 

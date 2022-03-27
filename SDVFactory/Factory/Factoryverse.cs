@@ -9,10 +9,16 @@ using xTile.Dimensions;
 
 namespace SDVFactory.Factory
 {
-    public class FactoryWorld
+    public class Factoryverse
     {
         public long NextMachineId { get; set; } = -1;
         public Dictionary<long, Machines.Machine> Machines { get; set; } = new Dictionary<long, Machines.Machine>();
+
+        public void Tick(uint elapsedGameMinutes)
+        {
+            while(elapsedGameMinutes-- > 0)
+                foreach (var machine in Machines.Values) machine.OnTick();
+        }
 
         public void ActivateMachine(GameLocation l, Farmer who, Furniture f, Location vect, long machine)
         {
