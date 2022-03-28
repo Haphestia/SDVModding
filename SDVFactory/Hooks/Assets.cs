@@ -16,7 +16,8 @@ namespace SDVFactory.Hooks
         {
             "Data\\Furniture",
             "Data\\AdditionalLocationsData",
-            "Data\\MiscGameData"
+            "Data\\MiscGameData",
+            "Data\\AudioCueModificationData"
         };
 
         public static void Patch(ModEntry mod) => new Assets(mod);
@@ -49,7 +50,6 @@ namespace SDVFactory.Hooks
                 var locs = asset.AsDictionary<string, AdditionalLocationData>().Data;
                 foreach(var l in Locations)
                 {
-                    FGame.Logger.Alert("Adding location: " + l.UniqueId);
                     locs.Add(l.UniqueId, new AdditionalLocationData() { ID = l.UniqueId, DisplayName = l.DisplayName, MapPath = l.AssetName, Type = l.Type });
                 }
             }
@@ -58,9 +58,12 @@ namespace SDVFactory.Hooks
                 var carts = (asset.Data as MiscGameData).MineCartDestinations;
                 foreach(var c in Minecarts)
                 {
-                    FGame.Logger.Alert("Adding minecart: " + c.UniqueId);
                     carts.Add(c.UniqueId, new MinecartDestinations() { DisplayName = c.DisplayName, Direction = c.Direction, Location = c.Location, Tile = c.LandingTile });
                 }
+            }
+            else if (asset.Name.IsEquivalentTo("Data\\AudioCueModificationData")) {
+                FGame.Logger.Alert("adding music");
+                asset.AsDictionary<string, AudioCueData>().Data.Add("bwdy.FactoryMod.Music.Potential", new AudioCueData() { ID = "bwdy.FactoryMod.Music.Potential", Looped = true, StreamedVorbis = true, UseReverb = false, Category = "Music", FilePaths = new List<string>() { FGame.Mod.Helper.DirectoryPath + "/Assets/Potential.ogg" } });
             }
             else if (asset.Name.IsEquivalentTo("Data\\Furniture"))
             { //internal name|english name, furn category, image size, collision size, rotations, price, placement restrictions [0 indoors, 1 outdoors, 2 any], display name, sprite index, texture asset
