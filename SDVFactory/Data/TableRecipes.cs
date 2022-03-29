@@ -42,9 +42,14 @@ namespace SDVFactory.Data
             ShortId = machine.ShortId;
             DisplayName = machine.DisplayName;
             Description = machine.Description;
-            Size = machine.Size;
+            Size = machine.DrawSize;
             TextureName = machine.TextureName;
             SheetIndex = machine.TextureTopLeftTile;
+        }
+
+        public Machine GetMachine()
+        {
+            return Machines.MachineList[ShortId];
         }
 
         public bool CanAfford()
@@ -72,9 +77,9 @@ namespace SDVFactory.Data
             }
         }
 
-        public Item Craft(bool dummy = false)
+        public Item Craft()
         {
-            return null; //TODO
+            return GetMachine().CreateOne();
         }
 
         public int GetDescriptionHeight(int width)
@@ -88,32 +93,17 @@ namespace SDVFactory.Data
             {
                 switch (item_id)
                 {
-                    case "-1":
-                        return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.568");
-                    case "-2":
-                        return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.569");
-                    case "-3":
-                        return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.570");
-                    case "-4":
-                        return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.571");
-                    case "-5":
-                        return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.572");
-                    case "-6":
-                        return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.573");
-                    default:
-                        if (item_id == (-777).ToString())
-                        {
-                            return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.574");
-                        }
-                        return "???";
+                    case "-1": return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.568");
+                    case "-2": return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.569");
+                    case "-3": return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.570");
+                    case "-4": return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.571");
+                    case "-5": return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.572");
+                    case "-6": return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.573");
+                    default: return (item_id == (-777).ToString()) ? Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.574")  : "???";
                 }
             }
             ParsedItemData item_data = Utility.GetItemDataForItemID(item_id);
-            if (item_data != null)
-            {
-                return item_data.displayName;
-            }
-            return Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.575");
+            return (item_data != null) ? item_data.displayName : Game1.content.LoadString("Strings\\StringsFromCSFiles:CraftingRecipe.cs.575");
         }
 
         public virtual void drawRecipeDescription(SpriteBatch b, Vector2 position, int width)

@@ -1,7 +1,7 @@
 ﻿using StardewValley;
 using System;
 
-namespace SDVFactory.Factory
+namespace SDVFactory.Data
 {
     public struct LoreTime
     {

@@ -33,6 +33,11 @@ namespace SDVFactory.Menus
             Game1.dialogueUp = true;
             Game1.player.CanMove = false;
         }
+        private void doOnExit()
+        {
+            Game1.dialogueUp = false;
+            Game1.player.canMove = true;
+        }
 
         public MenuEngineeringTable() : base( (int)Utility.getTopLeftPositionForCenteringOnScreen(800 + borderWidth * 2, 600 + borderWidth * 2).X, (int)Utility.getTopLeftPositionForCenteringOnScreen(800 + borderWidth * 2, 600 + borderWidth * 2).Y, 800 + borderWidth * 2, 600 + borderWidth * 2 )
         {
@@ -45,6 +50,7 @@ namespace SDVFactory.Menus
             LoadRecipeLayout();
             UpdateClickables();
             if (Game1.options.SnappyMenus) snapToDefaultClickableComponent();
+            exitFunction = new onExit(doOnExit);
         }
 
         private void LoadRecipeLayout()
@@ -166,7 +172,7 @@ namespace SDVFactory.Menus
                 if (c.containsPoint(x, y))
                 {
                     hoverRecipe = ClickableRecipes[c];
-                    if (lastCookingHover == null || !lastCookingHover.DisplayName.Equals(hoverRecipe.DisplayName)) lastCookingHover = hoverRecipe.Craft(dummy: true);
+                    if (lastCookingHover == null || !lastCookingHover.DisplayName.Equals(hoverRecipe.DisplayName)) lastCookingHover = hoverRecipe.Craft();
                     c.scale = Math.Min(c.scale + 0.02f, c.baseScale + 0.1f);
                 }
                 else c.scale = Math.Max(c.scale - 0.02f, c.baseScale);

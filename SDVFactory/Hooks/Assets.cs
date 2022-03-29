@@ -62,12 +62,25 @@ namespace SDVFactory.Hooks
                 }
             }
             else if (asset.Name.IsEquivalentTo("Data\\AudioCueModificationData")) {
-                FGame.Logger.Alert("adding music");
                 asset.AsDictionary<string, AudioCueData>().Data.Add("bwdy.FactoryMod.Music.Potential", new AudioCueData() { ID = "bwdy.FactoryMod.Music.Potential", Looped = true, StreamedVorbis = true, UseReverb = false, Category = "Music", FilePaths = new List<string>() { FGame.Mod.Helper.DirectoryPath + "/Assets/Potential.ogg" } });
             }
             else if (asset.Name.IsEquivalentTo("Data\\Furniture"))
-            { //internal name|english name, furn category, image size, collision size, rotations, price, placement restrictions [0 indoors, 1 outdoors, 2 any], display name, sprite index, texture asset
-                asset.AsDictionary<string, string>().Data.Add("Factory.FurnitureTest", "Factory.FurnitureTest/table/2 3/2 2/1/0/2/Factory Test/0/machines.test");
+            {   //internal name|english name, furn category, image size, collision size, rotations, price, placement restrictions [0 indoors, 1 outdoors, 2 any], display name, sprite index, texture asset
+                var data = asset.AsDictionary<string, string>().Data;
+                foreach(var m in Data.Machines.MachineList.Values)
+                {
+                    string md_id = "bwdy.FactoryMod.Furniture." + m.ShortId;
+                    string md_category = "table";
+                    string md_drawSize = m.DrawSize.X + " " + m.DrawSize.Y; //e.g. "3 2" starting top-left
+                    string md_collisionSize = m.CollisionSize.X + " " + m.CollisionSize.Y; //e.g. "2 2" starting bottom left
+                    string md_rotations = "1";
+                    string md_price = m.Price.ToString();
+                    string md_placementRestrictions = "2"; //[0 indoors, 1 outdoors, 2 any]
+                    string md_displayName = m.DisplayName;
+                    string md_spriteIndex = "0";
+                    string md_textureAssetName = m.TextureName;
+                    data.Add(md_id, md_id + "/" + md_category + "/" + md_drawSize + "/" + md_collisionSize + "/" + md_rotations + "/" + md_price + "/" + md_placementRestrictions + "/" + md_displayName + "/" + md_spriteIndex + "/" + md_textureAssetName);
+                }
             }
         }
 

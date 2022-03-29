@@ -1,4 +1,4 @@
-﻿using SDVFactory.Factory;
+﻿using SDVFactory.Data;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Objects;
@@ -13,7 +13,7 @@ namespace SDVFactory
         internal static ModEntry Mod;
         internal static IModHelper Helper { get => Mod.Helper; }
         
-        public static Factoryverse World;
+        public static Factoryverse Verse;
         internal static LoreTime LastMachineTickLoreTime = LoreTime.Zero;
         internal static TimeSpan LastMachineTick;
         internal static TimeSpan TickTimer = new TimeSpan(0, 0, 0, 0, 250);
@@ -25,50 +25,41 @@ namespace SDVFactory
 
             Action<string,string[]> act = (a, b) =>
             {
-                Game1.player.addItemByMenuIfNecessary(Factory.Machines.Machine.CreateOne());
+                Game1.player.addItemByMenuIfNecessary(Data.Machines.MachineList["Generator1"].CreateOne());
             };
             Helper.ConsoleCommands.Add("test", "Adds test machines", act);
 
             Helper.Events.GameLoop.UpdateTicking += GameLoop_UpdateTicking;
             Helper.Events.GameLoop.SaveLoaded += GameLoop_SaveLoaded;
             Helper.Events.GameLoop.Saving += GameLoop_Saving;
-
-            RegisterMachines();
         }
-
-        private static void RegisterMachines()
-        {
-            Factory.Machines.Machine.Register();
-        }
-
-
 
         private static void GameLoop_Saving(object sender, StardewModdingAPI.Events.SavingEventArgs e)
         {
-            if (World == null) return;
-            Helper.Data.WriteSaveData("bwdy.FactoryMod.World", World);
+            if (Verse == null) return;
+            Helper.Data.WriteSaveData("bwdy.FactoryMod.SaveData.Factoryverse", Verse);
         }
 
         private static void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
         {
             LastMachineTick = Game1.currentGameTime.TotalGameTime;
             LastMachineTickLoreTime = LoreTime.Now;
-            var w = Helper.Data.ReadSaveData<Factoryverse>("bwdy.FactoryMod.World");
+            var w = Helper.Data.ReadSaveData<Factoryverse>("bwdy.FactoryMod.SaveData.Factoryverse");
             if (w == null)
             {
-                World = new Factoryverse();
-                Logger.Info("Created new Factory data.");
+                Verse = new Factoryverse();
+                Logger.Info("Created new Factoryverse.");
             }
             else
             {
-                World = w;
-                Logger.Info("Loaded Factory data.");
+                Verse = w;
+                Logger.Info("Loaded saved Factoryverse.");
             }
         }
 
         private static void GameLoop_UpdateTicking(object sender, StardewModdingAPI.Events.UpdateTickingEventArgs e)
         {
-            if (World == null) return;
+            if (Verse == null) return;
             if (Game1.currentGameTime == null) return;
             if (!Game1.IsMasterGame) return; //this needs to be handled differently
             if(Game1.currentGameTime.TotalGameTime - LastMachineTick > TickTimer)
@@ -78,29 +69,35 @@ namespace SDVFactory
                 if (deltaMinutes < 1) return;
                 if (!Context.IsWorldReady) return;
                 LastMachineTickLoreTime = LoreTime.Now;
-                World.Tick(deltaMinutes);
+                Verse.Tick(deltaMinutes);
             }
         }
 
         //return true to suppress vanilla checks
-        public static bool CheckAction(GameLocation l, Farmer who, Location vect)
+        public static bool CheckAction(GameLocation l, Farmer who, xTile.Dimensions.Location vect)
         {
-            if (World == null) return false;
+            if (Verse == null) return false;
             foreach (Furniture f in l.furniture)
             {
                 if (f.boundingBox.Value.Contains((int)(vect.X * 64f), (int)(vect.Y * 64f)))
                 {
-                    if (f.modData.ContainsKey("FactoryMod") && f.modData.ContainsKey("FactoryId"))
+                    if (f.modData.ContainsKey("bwdy.FactoryMod.ModData.IsFactoryMachine") && f.modData.ContainsKey("bwdy.FactoryMod.ModData.MachineShortId"))
                     {
-                        string s = f.modData["FactoryId"];
-                        if (!string.IsNullOrEmpty(s))
+                        string machineShortId = f.modData["bwdy.FactoryMod.ModData.MachineShortId"];
+                        Data.Machine machine = Data.Machines.MachineList[machineShortId];
+                        long mid = -1;
+                        bool hasMid = false;
+                        if (f.modData.ContainsKey("bwdy.FactoryMod.ModData.MachineNumber"))
                         {
-                            if(long.TryParse(s, out long mid))
+                            if (long.TryParse(f.modData["bwdy.FactoryMod.ModData.MachineNumber"], out mid))
                             {
-                                World.ActivateMachine(l, who, f, vect, mid);
-                                return true;
+                                hasMid = true;
                             }
                         }
+                        if (mid == -1) hasMid = false;
+                        if (hasMid) machine.OnActivate(Verse.MachineStates[mid], l, who, f, vect);
+                        else machine.OnActivate(null, l, who, f, vect);
+                        return true;
                     }
                 }
             }
