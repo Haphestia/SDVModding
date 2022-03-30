@@ -58,26 +58,38 @@ namespace SDVFactory.Data
         public virtual void OnPlace(MachineState state, GameLocation l, Farmer who, Furniture f, int x, int y)
         {
             if (state.MachineNumber == -1) return;
-            FGame.Logger.Info("machine placed: " + state.MachineNumber);
+            // FGame.Logger.Info("machine placed: " + state.MachineNumber);
+            switch (MachineType)
+            {
+                case MachineType.GENERATOR:
+                    if (state.Inventory == null) state.Inventory = new Dictionary<int, Item>();
+                    break;
+            }
         }
 
         public virtual void OnRemove(MachineState state, GameLocation l, Farmer who, Furniture f, int x, int y)
         {
             if (state.MachineNumber == -1) return;
-            FGame.Logger.Info("machine removed: " + state.MachineNumber);
-            //machine state will be destroyed following this unless Persistent is true
+            // FGame.Logger.Info("machine removed: " + state.MachineNumber);
+            // machine state will be destroyed following this unless Persistent is true
         }
 
         public virtual void OnTick(MachineState state)
         {
             if (state.MachineNumber == -1) return;
-            FGame.Logger.Info("machine ticking: " + state.MachineNumber);
+            // FGame.Logger.Info("machine ticking: " + state.MachineNumber);
         }
 
         public virtual void OnActivate(MachineState state, GameLocation l, Farmer who, Furniture f, xTile.Dimensions.Location vect)
         {
             if (state == null || state.MachineNumber == -1) return;
-            FGame.Logger.Info("machine activate: " + state.MachineNumber);
+            // FGame.Logger.Info("machine activate: " + state.MachineNumber);
+            switch (MachineType)
+            {
+                case MachineType.GENERATOR:
+                    Menus.MachineMenu.Show(this, state);
+                    break;
+            }
         }
 
         public virtual void Draw(MachineState state, Furniture f, SpriteBatch spriteBatch, int x, int y, float alpha = 1f)
@@ -112,6 +124,8 @@ namespace SDVFactory.Data
 
         public string MachineShortId;
         public long MachineNumber = -1;
+        public Dictionary<int, Item> Inventory;
+
 
         public MachineState() { }
         public MachineState(string shortId, long number)
