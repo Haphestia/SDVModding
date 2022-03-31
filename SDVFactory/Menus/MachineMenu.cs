@@ -149,7 +149,7 @@ namespace SDVFactory.Menus
             int baseY = yPositionOnScreen + 104;
 
             drawHorizontalPartition(b, baseY + 28);
-
+            b.Draw(Game1.menuTexture, new Rectangle(baseX + 56, baseY + 64, 64, 252), Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 26), Color.White);
             //draw machine name
             int xmod = (((int)Game1.dialogueFont.MeasureString(Machine.DisplayName).X) / 2);
             int x = baseX + 400 - xmod;
@@ -159,11 +159,21 @@ namespace SDVFactory.Menus
             b.DrawString(Game1.dialogueFont, Machine.DisplayName, new Vector2(x, y) + new Vector2(2f, 0f), Game1.textShadowColor);
             b.DrawString(Game1.dialogueFont, Machine.DisplayName, new Vector2(x, y), Game1.textColor);
             //draw input test slot
-            DrawInventorySlot(b, baseX, baseY + 36 + borderWidth, heldItem, false);
+            DrawInventorySlot(b, baseX + 8, baseY + 44 + borderWidth, 0, false);
+            DrawInventorySlot(b, baseX + 8, baseY + 44 + borderWidth + 76, 1, false);
+            DrawInventorySlot(b, baseX + 8, baseY + 44 + borderWidth + (76 * 2), 2, false);
         }
 
-        private void DrawInventorySlot(SpriteBatch b, int x, int y, Item item = null, bool dimmed = false)
+        private void DrawInventorySlot(SpriteBatch b, int x, int y, int invSlot, bool dimmed = false)
         {
+            Item item = null;
+            if(MachineState != null && MachineState.Inventory != null)
+            {
+                if (MachineState.Inventory.ContainsKey(invSlot))
+                {
+                    item = MachineState.Inventory[invSlot];
+                }
+            }
             Vector2 vector = new Vector2(x, y);
             b.Draw(Game1.menuTexture, vector, Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 10), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0.5f);
             if (item == null) return;

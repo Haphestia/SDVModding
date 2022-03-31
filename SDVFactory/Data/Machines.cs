@@ -27,9 +27,32 @@ namespace SDVFactory.Data
                 TextureTopLeftTile = new Point(0,0),
                 MachineType = MachineType.GENERATOR,
                 Price = 0,
-                Persistent = false
+                Persistent = false,
+                ItemInputs = ItemXput.ONE_ITEM,
+                PowerOutputs = PowerXput.POWER
             }}
         };
+    }
+
+    internal enum ItemXput
+    {
+        NO_ITEMS,
+        ONE_ITEM,
+        TWO_ITEMS,
+        THREE_ITEMS
+    }
+
+    public enum FluidXput
+    {
+        NO_FLUIDS,
+        ONE_FLUID,
+        TWO_FLUIDS
+    }
+
+    public enum PowerXput
+    {
+        NO_POWER,
+        POWER
     }
 
     internal class Machine
@@ -45,6 +68,12 @@ namespace SDVFactory.Data
         public MachineType MachineType;
         public int Price;
         public bool Persistent = false;
+        public ItemXput ItemInputs = ItemXput.NO_ITEMS;
+        public FluidXput FluidInputs = FluidXput.NO_FLUIDS;
+        public PowerXput PowerInputs = PowerXput.NO_POWER;
+        public ItemXput ItemOutputs = ItemXput.NO_ITEMS;
+        public FluidXput FluidOutputs = FluidXput.NO_FLUIDS;
+        public PowerXput PowerOutputs = PowerXput.NO_POWER;
 
         public Furniture CreateOne()
         {
