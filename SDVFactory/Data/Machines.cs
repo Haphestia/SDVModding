@@ -28,7 +28,11 @@ namespace SDVFactory.Data
                 MachineType = MachineType.GENERATOR,
                 Price = 0,
                 Persistent = false,
-                ItemInputs = ItemXput.ONE_ITEM,
+                ItemInputs = ItemXput.THREE_ITEMS,
+                FluidInputs = FluidXput.TWO_FLUIDS,
+                PowerInputs = PowerXput.POWER,
+                ItemOutputs = ItemXput.THREE_ITEMS,
+                FluidOutputs = FluidXput.TWO_FLUIDS,
                 PowerOutputs = PowerXput.POWER
             }}
         };
@@ -74,6 +78,16 @@ namespace SDVFactory.Data
         public ItemXput ItemOutputs = ItemXput.NO_ITEMS;
         public FluidXput FluidOutputs = FluidXput.NO_FLUIDS;
         public PowerXput PowerOutputs = PowerXput.NO_POWER;
+
+        public bool HasItemInputs => ItemInputs != ItemXput.NO_ITEMS;
+        public bool HasFluidInputs => FluidInputs != FluidXput.NO_FLUIDS;
+        public bool HasPowerInputs => PowerInputs != PowerXput.NO_POWER;
+        public bool HasInputs => (HasItemInputs || HasFluidInputs || HasPowerInputs);
+
+        public bool HasItemOutputs => ItemOutputs != ItemXput.NO_ITEMS;
+        public bool HasFluidOutputs => FluidOutputs != FluidXput.NO_FLUIDS;
+        public bool HasPowerOutputs => PowerOutputs != PowerXput.NO_POWER;
+        public bool HasOutputs => (HasItemOutputs || HasFluidOutputs || HasPowerOutputs);
 
         public Furniture CreateOne()
         {

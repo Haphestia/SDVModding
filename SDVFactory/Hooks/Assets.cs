@@ -26,7 +26,7 @@ namespace SDVFactory.Hooks
         {
             Mod = mod;
 
-            LoadableAssetMap = Data.LoadableAssets.LoadableAssetMap;
+            LoadableAssetMap = Data.TextureCache.AssetMap;
             Locations = Data.Locations.LocationList;
             foreach (var l in Locations) LoadableAssetMap.Add(l.AssetName, l.AssetPath);
             Minecarts = Data.Minecarts.MinecartList;

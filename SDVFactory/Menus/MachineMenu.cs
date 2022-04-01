@@ -149,7 +149,8 @@ namespace SDVFactory.Menus
             int baseY = yPositionOnScreen + 104;
 
             drawHorizontalPartition(b, baseY + 28);
-            b.Draw(Game1.menuTexture, new Rectangle(baseX + 56, baseY + 64, 64, 252), Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 26), Color.White);
+            //b.Draw(Game1.menuTexture, new Rectangle(baseX + 56, baseY + 64, 64, 252), Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 26), Color.White);
+            //b.Draw(Game1.menuTexture, new Rectangle(baseX + 680, baseY + 64, 64, 252), Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 26), Color.White);
             //draw machine name
             int xmod = (((int)Game1.dialogueFont.MeasureString(Machine.DisplayName).X) / 2);
             int x = baseX + 400 - xmod;
@@ -158,10 +159,134 @@ namespace SDVFactory.Menus
             b.DrawString(Game1.dialogueFont, Machine.DisplayName, new Vector2(x, y) + new Vector2(0f, 2f), Game1.textShadowColor);
             b.DrawString(Game1.dialogueFont, Machine.DisplayName, new Vector2(x, y) + new Vector2(2f, 0f), Game1.textShadowColor);
             b.DrawString(Game1.dialogueFont, Machine.DisplayName, new Vector2(x, y), Game1.textColor);
-            //draw input test slot
-            DrawInventorySlot(b, baseX + 8, baseY + 44 + borderWidth, 0, false);
-            DrawInventorySlot(b, baseX + 8, baseY + 44 + borderWidth + 76, 1, false);
-            DrawInventorySlot(b, baseX + 8, baseY + 44 + borderWidth + (76 * 2), 2, false);
+
+            int leftEdge = baseX;
+            int rightEdge = baseX + 800;
+
+            //draw inputs
+            int tempX = leftEdge;
+            if (Machine.HasInputs)
+            {
+                if (Machine.HasPowerInputs)
+                {
+                    b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.PowerMeter"), new Vector2(tempX - 4, (int)baseY + 28 + borderWidth), new Rectangle(1, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                    int clipAmount = 27; //5 for full, 43 for empty
+                    b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.PowerMeter"), new Vector2(tempX - 4, (int)baseY + 28 + borderWidth + (clipAmount * 4)), new Rectangle(19, clipAmount, 16, 61 - clipAmount), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                    tempX += (17 * 4);
+                }
+                if (Machine.HasFluidInputs)
+                {
+                    if (Machine.FluidInputs == FluidXput.ONE_FLUID)
+                    {
+                        b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.FluidMeter"), new Vector2(tempX - 4, (int)baseY + 28 + borderWidth), new Rectangle(1, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                        int clipAmount = 9; //5 for full, 43 for empty
+                        Color c = Color.Coral;
+                        b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.FluidMeter"), new Vector2(tempX - 4, (int)baseY + 28 + borderWidth + (clipAmount * 4)), new Rectangle(19, clipAmount, 16, 61 - clipAmount), c, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                        tempX += (17 * 4);
+                    } else
+                    {
+                        //two fluids
+                        b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.FluidMeter"), new Vector2(tempX - 4, (int)baseY + 28 + borderWidth), new Rectangle(1, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                        int clipAmount = 10; //5 for full, 43 for empty
+                        Color c = Color.CornflowerBlue;
+                        b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.FluidMeter"), new Vector2(tempX - 4, (int)baseY + 28 + borderWidth + (clipAmount * 4)), new Rectangle(19, clipAmount, 16, 61 - clipAmount), c, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                        tempX += (17 * 4);
+
+                        b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.FluidMeter"), new Vector2(tempX - 4, (int)baseY + 28 + borderWidth), new Rectangle(1, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                        clipAmount = 37; //5 for full, 43 for empty
+                        c = Color.LimeGreen;
+                        b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.FluidMeter"), new Vector2(tempX - 4, (int)baseY + 28 + borderWidth + (clipAmount * 4)), new Rectangle(19, clipAmount, 16, 61 - clipAmount), c, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                        tempX += (17 * 4);
+                    }
+                }
+                if (Machine.HasItemInputs)
+                {
+                    switch (Machine.ItemInputs)
+                    {
+                        case ItemXput.ONE_ITEM:
+                            DrawInventorySlot(b, tempX, baseY + 44 + borderWidth + 76, 0, false);
+                            break;
+                        case ItemXput.TWO_ITEMS:
+                            DrawInventorySlot(b, tempX, baseY + 44 + borderWidth + 20, 0, false);
+                            DrawInventorySlot(b, tempX, baseY + 44 + borderWidth + 76 + 52, 2, false);
+                            break;
+                        case ItemXput.THREE_ITEMS:
+                            DrawInventorySlot(b, tempX, baseY + 44 + borderWidth, 0, false);
+                            DrawInventorySlot(b, tempX, baseY + 44 + borderWidth + 76, 1, false);
+                            DrawInventorySlot(b, tempX, baseY + 44 + borderWidth + (76 * 2), 2, false);
+                            break;
+                    }
+                    b.Draw(Game1.menuTexture, new Rectangle(tempX + 44, baseY + 64, 64, 252), Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 26), Color.White);
+                }
+                b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.IO"), new Vector2(tempX + 80, (int)baseY + 28 + borderWidth), new Rectangle(0, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+            }
+
+            //draw outputs
+            tempX = rightEdge;
+            if (Machine.HasInputs)
+            {
+                if (Machine.HasPowerInputs)
+                {
+                    b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.PowerMeter"), new Vector2(tempX + 4 - (16 * 4), (int)baseY + 28 + borderWidth), new Rectangle(1, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                    int clipAmount = 7; //5 for full, 43 for empty
+                    b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.PowerMeter"), new Vector2(tempX + 4 - (16 * 4), (int)baseY + 28 + borderWidth + (clipAmount * 4)), new Rectangle(19, clipAmount, 16, 61 - clipAmount), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                    tempX -= (17 * 4);
+                }
+                if (Machine.HasFluidInputs)
+                {
+                    if (Machine.FluidInputs == FluidXput.ONE_FLUID)
+                    {
+                        b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.FluidMeter"), new Vector2(tempX + 4 - (16 * 4), (int)baseY + 28 + borderWidth), new Rectangle(1, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                        int clipAmount = 8; //5 for full, 43 for empty
+                        Color c = Color.Coral;
+                        b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.FluidMeter"), new Vector2(tempX + 4 - (16 * 4), (int)baseY + 28 + borderWidth + (clipAmount * 4)), new Rectangle(19, clipAmount, 16, 61 - clipAmount), c, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                        tempX -= (17 * 4);
+                    }
+                    else
+                    {
+                        //two fluids
+                        b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.FluidMeter"), new Vector2(tempX + 4 - (16 * 4), (int)baseY + 28 + borderWidth), new Rectangle(1, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                        int clipAmount = 15; //5 for full, 43 for empty
+                        Color c = Color.Purple;
+                        b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.FluidMeter"), new Vector2(tempX + 4 - (16 * 4), (int)baseY + 28 + borderWidth + (clipAmount * 4)), new Rectangle(19, clipAmount, 16, 61 - clipAmount), c, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                        tempX -= (17 * 4);
+
+                        b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.FluidMeter"), new Vector2(tempX + 4 - (16 * 4), (int)baseY + 28 + borderWidth), new Rectangle(1, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                        clipAmount = 5; //5 for full, 43 for empty
+                        c = Color.Yellow;
+                        b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.FluidMeter"), new Vector2(tempX + 4 - (16 * 4), (int)baseY + 28 + borderWidth + (clipAmount * 4)), new Rectangle(19, clipAmount, 16, 61 - clipAmount), c, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                        tempX -= (17 * 4);
+                    }
+                }
+                if (Machine.HasItemInputs)
+                {
+                    switch (Machine.ItemInputs)
+                    {
+                        case ItemXput.ONE_ITEM:
+                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + 76, 0, false);
+                            break;
+                        case ItemXput.TWO_ITEMS:
+                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + 20, 0, false);
+                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + 76 + 52, 2, false);
+                            break;
+                        case ItemXput.THREE_ITEMS:
+                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth, 0, false);
+                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + 76, 1, false);
+                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + (76 * 2), 2, false);
+                            break;
+                    }
+                    b.Draw(Game1.menuTexture, new Rectangle(tempX - 108, baseY + 64, 64, 252), Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 26), Color.White);
+                }
+                b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.IO"), new Vector2(tempX - 80 - (16 * 4), (int)baseY + 28 + borderWidth), new Rectangle(16, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+            }
+
+
+            //draw output test slots
+            //draw input/output shields
+            //b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.IO"), new Vector2(baseX + 800 - 92 - 64, (int)baseY + 28 + borderWidth), new Rectangle(16, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+            //DrawInventorySlot(b, baseX + 728, baseY + 44 + borderWidth, 0, false);
+            //DrawInventorySlot(b, baseX + 728, baseY + 44 + borderWidth + 76, 1, false);
+            //DrawInventorySlot(b, baseX + 728, baseY + 44 + borderWidth + (76 * 2), 2, false);
         }
 
         private void DrawInventorySlot(SpriteBatch b, int x, int y, int invSlot, bool dimmed = false)
