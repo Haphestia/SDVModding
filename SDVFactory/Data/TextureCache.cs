@@ -9,6 +9,7 @@ namespace SDVFactory.Data
         {
             {"factorytiles", "Assets\\factorytiles.png"},
             {"bwdy.FactoryMod.Textures.IO", "Assets\\io.png"},
+            {"bwdy.FactoryMod.Textures.Bits", "Assets\\bits.png"},
             {"bwdy.FactoryMod.Textures.PowerMeter", "Assets\\power.png"},
             {"bwdy.FactoryMod.Textures.FluidMeter", "Assets\\fluid.png"},
             {"bwdy.FactoryMod.Textures.Machines", "Assets\\machines.png"}

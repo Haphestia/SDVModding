@@ -37,14 +37,14 @@ namespace SDVFactory
         private static void GameLoop_Saving(object sender, StardewModdingAPI.Events.SavingEventArgs e)
         {
             if (Verse == null) return;
-            Helper.Data.WriteSaveData("bwdy.FactoryMod.SaveData.Factoryverse", Verse);
+            Helper.Data.WriteSaveData("bwdy.FactoryMod.SaveData.Factoryverse", System.Text.Json.JsonSerializer.Serialize(Verse, typeof(Factoryverse), new System.Text.Json.JsonSerializerOptions() { IncludeFields = true }));
         }
 
         private static void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
         {
             LastMachineTick = Game1.currentGameTime.TotalGameTime;
             LastMachineTickLoreTime = LoreTime.Now;
-            var w = Helper.Data.ReadSaveData<Factoryverse>("bwdy.FactoryMod.SaveData.Factoryverse");
+            var w = Helper.Data.ReadSaveData<string>("bwdy.FactoryMod.SaveData.Factoryverse");
             if (w == null)
             {
                 Verse = new Factoryverse();
@@ -52,7 +52,7 @@ namespace SDVFactory
             }
             else
             {
-                Verse = w;
+                Verse = System.Text.Json.JsonSerializer.Deserialize<Factoryverse>(w, new System.Text.Json.JsonSerializerOptions() { IncludeFields = true });
                 Logger.Info("Loaded saved Factoryverse.");
             }
         }

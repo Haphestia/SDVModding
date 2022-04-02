@@ -92,7 +92,7 @@ namespace SDVFactory.Menus
         {
             base.receiveLeftClick(x, y);
             heldItem = Inventory.leftClick(x, y, heldItem);
-            //do stuff here
+            heldItem = MachineClick(x, y, heldItem);
             if (heldItem != null && !isWithinBounds(x, y) && heldItem.canBeTrashed())
             {
                 Game1.playSound("throwDownITem");
@@ -117,6 +117,21 @@ namespace SDVFactory.Menus
             {
                 hoverTitle = Inventory.hoverTitle;
                 hoverText = Inventory.hoverText;
+            } else
+            {
+                int slot = GetItemSlotAtPosition(x, y);
+                if (slot >= 0)
+                {
+                    hoverItem = MachineState.Inventory[slot];
+                    if (hoverItem != null)
+                    {
+                        hoverTitle = hoverItem.DisplayName;
+                        hoverText = hoverItem.getDescription();
+                    } else
+                    {
+                        //are we hovering a fluid, or power?
+                    }
+                }
             }
         }
 
@@ -143,14 +158,119 @@ namespace SDVFactory.Menus
             drawMouse(b);
         }
 
+        //returns -1 for none, or 0-5 for input1, input2, input3, output1, output2, output3
+        public int GetItemSlotAtPosition(int x, int y)
+        {
+            Rectangle test = new Rectangle(0,0,64,64);
+            int baseX = xPositionOnScreen + borderWidth;
+            int baseY = yPositionOnScreen + 104;
+            int leftEdge = baseX;
+            int rightEdge = baseX + 800;
+            int tempX = leftEdge;
+            if (Machine.HasInputs)
+            {
+                if (Machine.HasPowerInputs) tempX += (17 * 4);
+                if (Machine.HasFluidInputs)
+                {
+                    if (Machine.FluidInputs == FluidXput.ONE_FLUID) tempX += (17 * 4);
+                    else {
+                        tempX += (17 * 4);
+                        tempX += (17 * 4);
+                    }
+                }
+                if (Machine.HasItemInputs)
+                {
+                    switch (Machine.ItemInputs)
+                    {
+                        case ItemXput.ONE_ITEM:
+                            if (new Rectangle(tempX, baseY + 44 + borderWidth + 76, 64, 64).Contains(x, y)) return 0;
+                            break;
+                        case ItemXput.TWO_ITEMS:
+                            if (new Rectangle(tempX, baseY + 44 + borderWidth + 20, 64, 64).Contains(x, y)) return 0;
+                            if (new Rectangle(tempX, baseY + 44 + borderWidth + 76 + 52, 64, 64).Contains(x, y)) return 1;
+                            break;
+                        case ItemXput.THREE_ITEMS:
+                            if (new Rectangle(tempX, baseY + 44 + borderWidth, 64, 64).Contains(x, y)) return 0;
+                            if (new Rectangle(tempX, baseY + 44 + borderWidth + 76, 64, 64).Contains(x, y)) return 1;
+                            if (new Rectangle(tempX, baseY + 44 + borderWidth + (76 * 2), 64, 64).Contains(x, y)) return 2;
+                            break;
+                    }
+                }
+            }
+            tempX = rightEdge;
+            if (Machine.HasOutputs)
+            {
+                if (Machine.HasPowerOutputs) tempX -= (17 * 4);
+                if (Machine.HasFluidOutputs)
+                {
+                    if (Machine.FluidOutputs == FluidXput.ONE_FLUID) tempX -= (17 * 4);
+                    else {
+                        tempX -= (17 * 4);
+                        tempX -= (17 * 4);
+                    }
+                }
+                if (Machine.HasItemOutputs)
+                {
+                    switch (Machine.ItemOutputs)
+                    {
+                        case ItemXput.ONE_ITEM:
+                            if (new Rectangle(tempX - (16 * 4), baseY + 44 + borderWidth + 76, 64, 64).Contains(x, y)) return 3;
+                            break;
+                        case ItemXput.TWO_ITEMS:
+                            if (new Rectangle(tempX - (16 * 4), baseY + 44 + borderWidth + 20, 64, 64).Contains(x, y)) return 3;
+                            if (new Rectangle(tempX - (16 * 4), baseY + 44 + borderWidth + 76 + 52, 64, 64).Contains(x, y)) return 4;
+                            break;
+                        case ItemXput.THREE_ITEMS:
+                            if (new Rectangle(tempX - (16 * 4), baseY + 44 + borderWidth, 64, 64).Contains(x, y)) return 3;
+                            if (new Rectangle(tempX - (16 * 4), baseY + 44 + borderWidth + 76, 64, 64).Contains(x, y)) return 4;
+                            if (new Rectangle(tempX - (16 * 4), baseY + 44 + borderWidth + (76 * 2), 64, 64).Contains(x, y)) return 5;
+                            break;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        public Item MachineClick(int x, int y, Item toPlace)
+        {
+            //are we clicking a machine inventory slot?
+            int slot = GetItemSlotAtPosition(x, y);
+            if (slot < 0) return toPlace;
+            Item item = MachineState.Inventory[slot];
+            if (item != null && !item.canStackWith(toPlace))
+            {
+                //swap items
+                Game1.playSound("stoneStep");
+                Item newHeld = Utility.removeItemFromInventory(slot, MachineState.Inventory);
+                Utility.addItemToInventory(toPlace, slot, MachineState.Inventory);
+                return newHeld;
+            }
+
+            if (item != null)
+            {
+                Game1.playSound("stoneStep");
+                if (toPlace != null)
+                {
+                    return Utility.addItemToInventory(toPlace, slot, MachineState.Inventory);
+                }
+                return Utility.removeItemFromInventory(slot, MachineState.Inventory);
+            }
+
+            if (toPlace != null)
+            {
+                Game1.playSound("stoneStep");
+                return Utility.addItemToInventory(toPlace, slot, MachineState.Inventory);
+            }
+
+            return toPlace;
+        }
+
         private void DrawMachineUI(SpriteBatch b)
         {
             int baseX = xPositionOnScreen + borderWidth;
             int baseY = yPositionOnScreen + 104;
 
             drawHorizontalPartition(b, baseY + 28);
-            //b.Draw(Game1.menuTexture, new Rectangle(baseX + 56, baseY + 64, 64, 252), Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 26), Color.White);
-            //b.Draw(Game1.menuTexture, new Rectangle(baseX + 680, baseY + 64, 64, 252), Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 26), Color.White);
             //draw machine name
             int xmod = (((int)Game1.dialogueFont.MeasureString(Machine.DisplayName).X) / 2);
             int x = baseX + 400 - xmod;
@@ -170,7 +290,10 @@ namespace SDVFactory.Menus
                 if (Machine.HasPowerInputs)
                 {
                     b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.PowerMeter"), new Vector2(tempX - 4, (int)baseY + 28 + borderWidth), new Rectangle(1, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
-                    int clipAmount = 27; //5 for full, 43 for empty
+                    int pmax = Machine.PowerInputBufferSize;
+                    int pcur = MachineState.PowerInputBuffer;
+                    float pfill = (float)pcur / (float)pmax;
+                    int clipAmount = (43 - (int)Math.Ceiling(pfill * 38f));//5 for full, 43 for empty
                     b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.PowerMeter"), new Vector2(tempX - 4, (int)baseY + 28 + borderWidth + (clipAmount * 4)), new Rectangle(19, clipAmount, 16, 61 - clipAmount), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
                     tempX += (17 * 4);
                 }
@@ -208,7 +331,7 @@ namespace SDVFactory.Menus
                             break;
                         case ItemXput.TWO_ITEMS:
                             DrawInventorySlot(b, tempX, baseY + 44 + borderWidth + 20, 0, false);
-                            DrawInventorySlot(b, tempX, baseY + 44 + borderWidth + 76 + 52, 2, false);
+                            DrawInventorySlot(b, tempX, baseY + 44 + borderWidth + 76 + 52, 1, false);
                             break;
                         case ItemXput.THREE_ITEMS:
                             DrawInventorySlot(b, tempX, baseY + 44 + borderWidth, 0, false);
@@ -216,25 +339,28 @@ namespace SDVFactory.Menus
                             DrawInventorySlot(b, tempX, baseY + 44 + borderWidth + (76 * 2), 2, false);
                             break;
                     }
-                    b.Draw(Game1.menuTexture, new Rectangle(tempX + 44, baseY + 64, 64, 252), Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 26), Color.White);
                 }
+                b.Draw(Game1.menuTexture, new Rectangle(tempX + 44, baseY + 64, 64, 252), Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 26), Color.White);
                 b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.IO"), new Vector2(tempX + 80, (int)baseY + 28 + borderWidth), new Rectangle(0, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
             }
 
             //draw outputs
             tempX = rightEdge;
-            if (Machine.HasInputs)
+            if (Machine.HasOutputs)
             {
-                if (Machine.HasPowerInputs)
+                if (Machine.HasPowerOutputs)
                 {
                     b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.PowerMeter"), new Vector2(tempX + 4 - (16 * 4), (int)baseY + 28 + borderWidth), new Rectangle(1, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
-                    int clipAmount = 7; //5 for full, 43 for empty
+                    int pmax = Machine.PowerOutputBufferSize;
+                    int pcur = MachineState.PowerOutputBuffer;
+                    float pfill = (float)pcur / (float)pmax;
+                    int clipAmount = (43 - (int)Math.Ceiling(pfill * 38f));
                     b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.PowerMeter"), new Vector2(tempX + 4 - (16 * 4), (int)baseY + 28 + borderWidth + (clipAmount * 4)), new Rectangle(19, clipAmount, 16, 61 - clipAmount), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
                     tempX -= (17 * 4);
                 }
-                if (Machine.HasFluidInputs)
+                if (Machine.HasFluidOutputs)
                 {
-                    if (Machine.FluidInputs == FluidXput.ONE_FLUID)
+                    if (Machine.FluidOutputs == FluidXput.ONE_FLUID)
                     {
                         b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.FluidMeter"), new Vector2(tempX + 4 - (16 * 4), (int)baseY + 28 + borderWidth), new Rectangle(1, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
                         int clipAmount = 8; //5 for full, 43 for empty
@@ -258,35 +384,42 @@ namespace SDVFactory.Menus
                         tempX -= (17 * 4);
                     }
                 }
-                if (Machine.HasItemInputs)
+                if (Machine.HasItemOutputs)
                 {
-                    switch (Machine.ItemInputs)
+                    switch (Machine.ItemOutputs)
                     {
                         case ItemXput.ONE_ITEM:
-                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + 76, 0, false);
+                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + 76, 3, false);
                             break;
                         case ItemXput.TWO_ITEMS:
-                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + 20, 0, false);
-                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + 76 + 52, 2, false);
+                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + 20, 3, false);
+                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + 76 + 52, 4, false);
                             break;
                         case ItemXput.THREE_ITEMS:
-                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth, 0, false);
-                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + 76, 1, false);
-                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + (76 * 2), 2, false);
+                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth, 3, false);
+                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + 76, 4, false);
+                            DrawInventorySlot(b, tempX - (16 * 4), baseY + 44 + borderWidth + (76 * 2), 5, false);
                             break;
                     }
-                    b.Draw(Game1.menuTexture, new Rectangle(tempX - 108, baseY + 64, 64, 252), Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 26), Color.White);
+                    tempX -= 108;
                 }
-                b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.IO"), new Vector2(tempX - 80 - (16 * 4), (int)baseY + 28 + borderWidth), new Rectangle(16, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                b.Draw(Game1.menuTexture, new Rectangle(tempX - 32, baseY + 64, 64, 252), Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 26), Color.White);
+                b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.IO"), new Vector2(tempX - 36 - 32, (int)baseY + 28 + borderWidth), new Rectangle(16, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
             }
 
-
-            //draw output test slots
-            //draw input/output shields
-            //b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.IO"), new Vector2(baseX + 800 - 92 - 64, (int)baseY + 28 + borderWidth), new Rectangle(16, 0, 16, 61), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
-            //DrawInventorySlot(b, baseX + 728, baseY + 44 + borderWidth, 0, false);
-            //DrawInventorySlot(b, baseX + 728, baseY + 44 + borderWidth + 76, 1, false);
-            //DrawInventorySlot(b, baseX + 728, baseY + 44 + borderWidth + (76 * 2), 2, false);
+            //draw progress and warnings
+            if(MachineState.CurrentlyProcessingRecipe == null || MachineState.InsufficientPower)
+            {
+                b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.Bits"), new Vector2(leftEdge + 400 - 32, baseY + 160), new Rectangle(32, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+            }
+            else
+            {
+                b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.Bits"), new Vector2(leftEdge + 400 - 32, baseY + 160), new Rectangle(0, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+                int progressMax = MachineState.CurrentlyProcessingRecipe.ProcessingTimeInMinutes;
+                int progressCur = progressMax - MachineState.ProcessMinutesRemaining;
+                int progress = (int)Math.Ceiling(((float)progressCur / (float)progressMax) * 16f);//0-16
+                b.Draw(TextureCache.Get("bwdy.FactoryMod.Textures.Bits"), new Vector2(leftEdge + 400 - 32, baseY + 160), new Rectangle(16, 0, progress, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+            }
         }
 
         private void DrawInventorySlot(SpriteBatch b, int x, int y, int invSlot, bool dimmed = false)
@@ -294,10 +427,7 @@ namespace SDVFactory.Menus
             Item item = null;
             if(MachineState != null && MachineState.Inventory != null)
             {
-                if (MachineState.Inventory.ContainsKey(invSlot))
-                {
-                    item = MachineState.Inventory[invSlot];
-                }
+                item = MachineState.Inventory[invSlot];
             }
             Vector2 vector = new Vector2(x, y);
             b.Draw(Game1.menuTexture, vector, Game1.getSourceRectForStandardTileSheet(Game1.menuTexture, 10), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0.5f);
