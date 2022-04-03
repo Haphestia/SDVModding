@@ -17,7 +17,9 @@ namespace SDVFactory.Hooks
             "Data\\Furniture",
             "Data\\AdditionalLocationsData",
             "Data\\MiscGameData",
-            "Data\\AudioCueModificationData"
+            "Data\\AudioCueModificationData",
+            "Data\\ToolData",
+            "Strings\\StringsFromCSFiles"
         };
 
         public static void Patch(ModEntry mod) => new Assets(mod);
@@ -48,10 +50,16 @@ namespace SDVFactory.Hooks
             if (asset.Name.IsEquivalentTo("Data\\AdditionalLocationsData"))
             {
                 var locs = asset.AsDictionary<string, AdditionalLocationData>().Data;
-                foreach(var l in Locations)
+                foreach (var l in Locations)
                 {
                     locs.Add(l.UniqueId, new AdditionalLocationData() { ID = l.UniqueId, DisplayName = l.DisplayName, MapPath = l.AssetName, Type = l.Type });
                 }
+            }
+            if (asset.Name.IsEquivalentTo("Strings\\StringsFromCSFiles"))
+            {
+                var strings = asset.AsDictionary<string, string>().Data;
+                strings.Add("bwdy.FactoryMod.Tools.WireTool.Name", "Wire Tool");
+                strings.Add("bwdy.FactoryMod.Tools.WireTool.Desc", "Manages wires connected to Machines.");
             }
             else if (asset.Name.IsEquivalentTo("Data\\MiscGameData"))
             {
@@ -77,12 +85,27 @@ namespace SDVFactory.Hooks
                     string md_price = m.Price.ToString();
                     string md_placementRestrictions = "2"; //[0 indoors, 1 outdoors, 2 any]
                     string md_displayName = m.DisplayName;
-                    string md_spriteIndex = "0";
+                    int tilesWide = Data.TextureCache.Get(m.TextureName).Width / 16;
+                    int tileIndex = (m.TextureTopLeftTile.Y * tilesWide) + m.TextureTopLeftTile.X;
+                    string md_spriteIndex = tileIndex.ToString();
                     string md_textureAssetName = m.TextureName;
                     data.Add(md_id, md_id + "/" + md_category + "/" + md_drawSize + "/" + md_collisionSize + "/" + md_rotations + "/" + md_price + "/" + md_placementRestrictions + "/" + md_displayName + "/" + md_spriteIndex + "/" + md_textureAssetName);
                 }
+            } 
+            else if (asset.Name.IsEquivalentTo("Data\\ToolData"))
+            {
+                var data = asset.AsDictionary<string, string>().Data;
+                string tool_class = "Axe";
+                string tool_nameKey = "Strings\\StringsFromCSFiles:bwdy.FactoryMod.Tools.WireTool.Name";
+                string tool_descKey = "Strings\\StringsFromCSFiles:bwdy.FactoryMod.Tools.WireTool.Desc";
+                string tool_index = "0";
+                string tool_texture = "bwdy.FactoryMod.Textures.Tool";
+                string tool = tool_class + "/" + tool_nameKey + "/" + tool_descKey + "/" + tool_index + "/" + tool_texture;
+                data.Add("bwdy.FactoryMod.Tools.WireTool", tool);
             }
         }
+
+        
 
         public bool CanLoad<T>(IAssetInfo asset)
         {
@@ -95,7 +118,7 @@ namespace SDVFactory.Hooks
             {
                 if (asset.Name.IsEquivalentTo(s))
                 {
-                    return Mod.Helper.Content.Load<T>(LoadableAssetMap[s], ContentSource.ModFolder);
+                    return Mod.Helper.ModContent.Load<T>(LoadableAssetMap[s]);
                 }
             }
             throw new InvalidOperationException($"Unloadable asset requested: '{asset.Name}'.");

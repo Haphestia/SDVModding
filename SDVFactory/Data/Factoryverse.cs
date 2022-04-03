@@ -13,6 +13,7 @@ namespace SDVFactory.Data
         public long NextMachineId { get; set; } = -1;
         public List<long> RecycleableIds = new List<long>();
         public Dictionary<long, MachineState> MachineStates { get; set; } = new Dictionary<long, MachineState>();
+        public List<Components.Wire> Wires { get; set; } = new List<Components.Wire>();
 
         public long CreateMachineState(string shortId)
         {
@@ -31,6 +32,10 @@ namespace SDVFactory.Data
 
         public void DestroyMachineState(long id)
         {
+            for (int i = Wires.Count; i > 0; i--)
+            {
+                if (Wires[i].InvolvesMachineNumber(id)) Wires.RemoveAt(i);
+            }
             if (MachineStates.ContainsKey(id))
             {
                 MachineStates.Remove(id);

@@ -12,7 +12,8 @@ namespace SDVFactory.Data
             {"bwdy.FactoryMod.Textures.Bits", "Assets\\bits.png"},
             {"bwdy.FactoryMod.Textures.PowerMeter", "Assets\\power.png"},
             {"bwdy.FactoryMod.Textures.FluidMeter", "Assets\\fluid.png"},
-            {"bwdy.FactoryMod.Textures.Machines", "Assets\\machines.png"}
+            {"bwdy.FactoryMod.Textures.Machines", "Assets\\machines.png"},
+            {"bwdy.FactoryMod.Textures.Tool", "Assets\\tool.png"}
         };
         private static Dictionary<string, Texture2D> Cache = new Dictionary<string, Texture2D>(); 
         internal static Texture2D Get(string assetName)

@@ -13,12 +13,29 @@ namespace SDVFactory.Data
             
             //Primitive Generator
             new TableRecipe(Machines.MachineList["Generator1"]){
-                TableLayout = new Point(0,0),
+                TableLayout = new Point(1,0),
                 Ingredients = new Dictionary<string, int>() {
                     { "388", 5 }, //wood
                     { "390", 15 } //stone
                 }
-            }
+            },
+
+            //Primitive Grinder
+            new TableRecipe(Machines.MachineList["Crusher1"]){
+                TableLayout = new Point(3,0),
+                Ingredients = new Dictionary<string, int>() {
+                    { "388", 5 }, //wood
+                    { "390", 15 } //stone
+                }
+            },
+
+            //Primitive Power Pole
+            new TableRecipe(Machines.MachineList["Connector1"]){
+                TableLayout = new Point(0,0),
+                Ingredients = new Dictionary<string, int>() {
+                    { "388", 5 }, //wood
+                }
+            },
 
         };
     }

@@ -63,6 +63,8 @@ namespace SDVFactory.Menus
             foreach (var recipe in Recipes)
             {
                 i++;
+                x = recipe.TableLayout.X;
+                y = recipe.TableLayout.Y;
                 int id = 200 + i;
                 var source_rect = new Rectangle(recipe.SheetIndex.X * 16, recipe.SheetIndex.Y * 16, recipe.Size.X * 16, recipe.Size.Y * 16);
                 var component = new ClickableTextureComponent("", new Rectangle(craftingPageX + x * (64 + spaceBetweenCraftingIcons), (yPositionOnScreen + spaceToClearTopBorder + borderWidth - 16) + y * 72, recipe.Size.X * 64, recipe.Size.Y * 64), null, "", recipe.Texture, source_rect, 4f) { myID = id, rightNeighborID = -99998, leftNeighborID = -99998, upNeighborID = -99998, downNeighborID = -99998, fullyImmutable = true, region = 8000 };

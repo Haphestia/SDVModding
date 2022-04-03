@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Netcode;
+using SDVFactory.Data.Components;
 using StardewValley;
 using StardewValley.Objects;
 using System;
@@ -26,18 +27,66 @@ namespace SDVFactory.Data
                 Description = "Generates power from solid fuels.",
                 DrawSize = new Point(2, 3),
                 CollisionSize = new Point(2, 2),
+                PowerConnectionPointOut = new Vector2(27,24),
+                PowerConnectionPointIn = new Vector2(27,24),
                 TextureName = "bwdy.FactoryMod.Textures.Machines",
                 TextureTopLeftTile = new Point(0,0),
                 Price = 0,
                 Persistent = false,
                 ItemInputs = ItemXput.ONE_ITEM,
                 PowerOutputBufferSize = 99,
+                PowerOutputRatePerMinute = 10,
                 Recipes = new List<MachineRecipe>()
                 {
                     new MachineRecipe(){ItemInput1 = ("382", 1), PowerOutputPerMinute = 3, ProcessingTimeInMinutes = 15 }
                 }
+            }},
+
+            { "Crusher1", new Machine() {
+                ShortId = "Crusher1",
+                DisplayName = "Primitive Crusher",
+                Description = "Crushes solid items into debris.",
+                DrawSize = new Point(2, 3),
+                CollisionSize = new Point(2, 2),
+                TextureName = "bwdy.FactoryMod.Textures.Machines",
+                TextureTopLeftTile = new Point(2,0),
+                Price = 0,
+                Persistent = false,
+                ItemInputs = ItemXput.ONE_ITEM,
+                PowerInputBufferSize = 99,
+                PowerConnectionPointOut = new Vector2(4,24),
+                PowerConnectionPointIn = new Vector2(4,24),
+                ItemOutputs = ItemXput.TWO_ITEMS,
+                Recipes = new List<MachineRecipe>()
+                {
+                    new MachineRecipe(){ItemInput1 = ("382", 1), ItemOutput1 = ("382", 1), ProcessingTimeInMinutes = 30, PowerInputPerMinute = 3 }
+                }
+            }},
+
+            { "Connector1", new Machine() {
+                ShortId = "Connector1",
+                DisplayName = "Primitive Power Pole",
+                Description = "Connects to power lines to transfer energy.",
+                DrawSize = new Point(1, 3),
+                CollisionSize = new Point(1, 1),
+                PowerConnectionPointIn = new Vector2(8,9),
+                PowerConnectionPointOut = new Vector2(8,9),
+                TextureName = "bwdy.FactoryMod.Textures.Machines",
+                TextureTopLeftTile = new Point(4,0),
+                Price = 0,
+                Persistent = false,
+                PowerInputBufferSize = 99,
+                PowerOutputBufferSize = 99,
+                PowerPassthroughOnly = true,
+                MenuType = MenuType.NO_MENU
             }}
         };
+    }
+
+    internal enum MenuType
+    {
+        NO_MENU,
+        MACHINE_MENU
     }
 
     internal enum ItemXput
@@ -59,12 +108,15 @@ namespace SDVFactory.Data
     {
         public string UniqueId { get => "bwdy.FactoryMod.Machines." + ShortId; }
         public string ShortId;
+        public MenuType MenuType = MenuType.MACHINE_MENU;
         public string DisplayName;
         public string Description;
         public Point DrawSize;
         public Point CollisionSize;
         public string TextureName;
         public Point TextureTopLeftTile;
+        public Vector2 PowerConnectionPointOut = Vector2.Zero;
+        public Vector2 PowerConnectionPointIn = Vector2.Zero;
         public int Price;
         public bool Persistent = false;
         public ItemXput ItemInputs = ItemXput.NO_ITEMS;
@@ -73,6 +125,8 @@ namespace SDVFactory.Data
         public ItemXput ItemOutputs = ItemXput.NO_ITEMS;
         public FluidXput FluidOutputs = FluidXput.NO_FLUIDS;
         public int PowerOutputBufferSize = 0;
+        public int PowerOutputRatePerMinute = 0;
+        public bool PowerPassthroughOnly = false;
         public List<MachineRecipe> Recipes = new List<MachineRecipe>();
 
         public bool HasItemInputs => ItemInputs != ItemXput.NO_ITEMS;
@@ -99,12 +153,16 @@ namespace SDVFactory.Data
             if (state.MachineNumber == -1) return;
             state.IsPlaced = true;
             state.Inventory = new Item[6];
+            var dp = FGame.Helper.Reflection.GetField<NetVector2>(f, "drawPosition").GetValue().Value;
+            state.Locations.Add(new MachineLocation() { LocationId = l.uniqueName.Value, X = (int)dp.X, Y = (int)dp.Y });
         }
 
         public virtual void OnRemove(MachineState state, GameLocation l, Farmer who, Furniture f, int x, int y)
         {
             if (state.MachineNumber == -1) return;
             state.IsPlaced = false;
+            MachineLocation ml = new MachineLocation() { LocationId = l.uniqueName.Value, X = x, Y = y };
+            state.Locations.Remove(ml);
             // machine state will be destroyed following this unless Persistent is true
         }
 
@@ -113,75 +171,118 @@ namespace SDVFactory.Data
             if (state.MachineNumber == -1) return;
             if (!state.IsPlaced) return;
 
-            //todo: bring in power, items, and fluids from network here
-
-            if(state.CurrentlyProcessingRecipe != null)
+            if (PowerPassthroughOnly)
             {
-                //update recipe cooking
-                var r = state.CurrentlyProcessingRecipe;
-                int requiredPower = r.PowerInputPerMinute;
-                if(state.PowerInputBuffer < requiredPower)
+                //if this is just a power network connector, do nothing
+            }
+            else
+            {
+
+                //todo: bring in power, items, and fluids from network here
+                if (state.CurrentlyProcessingRecipe != null)
                 {
-                    state.PowerInputBuffer = 0;
-                    state.InsufficientPower = true;
-                } else
-                {
-                    state.InsufficientPower = false;
-                    state.PowerOutputBuffer += r.PowerOutputPerMinute;
-                    if(state.PowerOutputBuffer > PowerOutputBufferSize) state.PowerOutputBuffer = PowerOutputBufferSize;
-                    state.PowerInputBuffer -= requiredPower;
-                    state.ProcessMinutesRemaining -= 1;
-                    if(state.ProcessMinutesRemaining <= 0)
+                    //update recipe cooking
+                    var r = state.CurrentlyProcessingRecipe;
+                    int requiredPower = r.PowerInputPerMinute;
+                    if (state.PowerInputBuffer < requiredPower)
                     {
-                        state.ProcessMinutesRemaining = 0;
-                        state.CurrentlyProcessingRecipe = null;
-                        FGame.Logger.Info("recipe finished");
-                        //todo: recipe done cooking! do item and fluid output! (check for space if appropriate)
+                        state.PowerInputBuffer = 0;
+                        state.InsufficientPower = true;
+                    }
+                    else
+                    {
+                        state.InsufficientPower = false;
+                        state.PowerOutputBuffer += r.PowerOutputPerMinute;
+                        if (state.PowerOutputBuffer > PowerOutputBufferSize) state.PowerOutputBuffer = PowerOutputBufferSize;
+                        state.PowerInputBuffer -= requiredPower;
+                        state.ProcessMinutesRemaining -= 1;
+                        if (state.ProcessMinutesRemaining <= 0)
+                        {
+                            state.ProcessMinutesRemaining = 0;
+                            state.CurrentlyProcessingRecipe = null;
+                            FGame.Logger.Info("recipe finished");
+                            //todo: recipe done cooking! do item and fluid output! (check for space if appropriate)
+                        }
                     }
                 }
-            } else
-            {
-                //check for new recipe activations
-                foreach(var r in Recipes)
+                else
                 {
-                    //check power
-                    if(state.PowerInputBuffer >= r.PowerInputPerMinute)
+                    //check for new recipe activations
+                    foreach (var r in Recipes)
                     {
-                        //is this a power-only recipe, e.g. for a generator?
-                        if(r.PowerOutputPerMinute != 0)
+                        //check power
+                        if (state.PowerInputBuffer >= r.PowerInputPerMinute)
                         {
-                            if(r.FluidOutput1.id == null && r.FluidOutput2.id == null)
+                            //is this a power-only recipe, e.g. for a generator?
+                            if (r.PowerOutputPerMinute != 0)
                             {
-                                if(r.ItemOutput1.id == null && r.ItemOutput2.id == null && r.ItemOutput3.id == null)
+                                if (r.FluidOutput1.id == null && r.FluidOutput2.id == null)
                                 {
-                                    //if so, is the power output buffer full?
-                                    // if it is, let's not start a recipe that only produces power.
-                                    if (state.PowerOutputBuffer >= state.Machine.PowerOutputBufferSize) continue;
+                                    if (r.ItemOutput1.id == null && r.ItemOutput2.id == null && r.ItemOutput3.id == null)
+                                    {
+                                        //if so, is the power output buffer full?
+                                        // if it is, let's not start a recipe that only produces power.
+                                        if (state.PowerOutputBuffer >= state.Machine.PowerOutputBufferSize) continue;
+                                    }
                                 }
                             }
+
+                            //check fluid inputs
+                            if (!r.CheckFluidIngredients(state)) continue;
+                            //check item inputs
+                            if (!r.CheckItemIngredients(state)) continue;
+
+                            r.ConsumeInputs(state);
+                            state.CurrentlyProcessingRecipe = r;
+                            state.ProcessMinutesRemaining = r.ProcessingTimeInMinutes;
                         }
-
-                        //check fluid inputs
-                        if (!r.CheckFluidIngredients(state)) continue;
-                        //check item inputs
-                        if (!r.CheckItemIngredients(state)) continue;
-
-                        r.ConsumeInputs(state);
-                        state.CurrentlyProcessingRecipe = r;
-                        state.ProcessMinutesRemaining = r.ProcessingTimeInMinutes;
                     }
                 }
+
+                //todo: export items, and fluids to the network here
+                //export power
+                if (state.PowerOutputBuffer > 0)
+                {
+                    List<(MachineState, Wire)> wiresToProcess = new List<(MachineState, Wire)>();
+                    foreach(var wwww in FGame.Verse.Wires.Where(w => w.IsOutputMachine(state))){
+                        wiresToProcess.Add((state, wwww));
+                    }
+                    while (wiresToProcess.Count > 0)
+                    {
+                        var w = wiresToProcess[0];
+                        wiresToProcess.RemoveAt(0);
+                        var om = w.Item2.GetOtherMachine(w.Item1);
+                        if (om == null) continue;
+                        if (om.Machine.PowerPassthroughOnly)
+                        {
+                            foreach(var ww in FGame.Verse.Wires.Where(ww => ww.InvolvesMachine(om)))
+                            {
+                                if (ww.InvolvesMachine(state)) continue;
+                                wiresToProcess.Add((om,ww));
+                            }
+                        }
+                        else if (!om.IsPowerInputBufferFull)
+                        {
+                            int freespace = om.PowerInputBufferFreeSpace;
+                            int transferAmount = Math.Min(freespace, Math.Min(state.PowerOutputBuffer, PowerOutputRatePerMinute));
+                            state.PowerOutputBuffer -= transferAmount;
+                            om.PowerInputBuffer += transferAmount;
+                        }
+                    }
+                }
+                //todo: distribute power evenly
             }
         }
 
         public virtual void OnActivate(MachineState state, GameLocation l, Farmer who, Furniture f, xTile.Dimensions.Location vect)
         {
             if (state == null || state.MachineNumber == -1) return;
-            Menus.MachineMenu.Show(this, state);
+            if(MenuType == MenuType.MACHINE_MENU) Menus.MachineMenu.Show(this, state);
         }
 
         public virtual void Draw(MachineState state, Furniture f, SpriteBatch spriteBatch, int x, int y, float alpha = 1f)
         {
+            //furniture stuff
             var sourceIndexOffset = FGame.Helper.Reflection.GetField<NetInt>(f, "sourceIndexOffset").GetValue().Value;
             var drawPosition = FGame.Helper.Reflection.GetField<NetVector2>(f, "drawPosition").GetValue().Value;
             Rectangle drawn_source_rect = f.sourceRect.Value;
@@ -194,6 +295,15 @@ namespace SDVFactory.Data
             else
             {
                 spriteBatch.Draw(tex, Game1.GlobalToLocal(Game1.viewport, new Vector2(x * 64 + ((f.shakeTimer > 0) ? Game1.random.Next(-1, 2) : 0), y * 64 - (f.sourceRect.Height * 4 - f.boundingBox.Height) + ((f.shakeTimer > 0) ? Game1.random.Next(-1, 2) : 0))), f.sourceRect.Value, Color.White * alpha, 0f, Vector2.Zero, 4f, f.Flipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None, (f.furniture_type.Value == 12) ? (2E-09f + f.TileLocation.Y / 100000f) : ((float)(f.boundingBox.Value.Bottom - (((int)f.furniture_type.Value == 6 || (int)f.furniture_type.Value == 17 || (int)f.furniture_type.Value == 13) ? 48 : 8)) / 10000f));
+            }
+
+            //machine stuff
+            if(state != null)
+            {
+                if (state.IsPlaced)
+                {
+
+                }
             }
         }
     }
@@ -507,6 +617,13 @@ namespace SDVFactory.Data
         }
     }
 
+    public struct MachineLocation
+    {
+        public string LocationId;
+        public int X;
+        public int Y;
+    }
+
     public class MachineState
     {
         [JsonIgnore]
@@ -524,6 +641,8 @@ namespace SDVFactory.Data
             set { Inventory = DeserializeObjectWithXML<Item[]>(value); }
         }
 
+        public List<MachineLocation> Locations = new List<MachineLocation>();
+
         public (string id, int units)[] FluidInventory = new (string id, int units)[4]; //0-1 inputs, 2-3 outputs
 
         public int PowerInputBuffer = 0;
@@ -534,6 +653,8 @@ namespace SDVFactory.Data
         public int ProcessMinutesRemaining = 0;
         public bool InsufficientPower = false;
 
+        public bool IsPowerInputBufferFull => PowerInputBuffer == Machine.PowerInputBufferSize;
+        public int PowerInputBufferFreeSpace => Machine.PowerInputBufferSize - PowerInputBuffer;
 
         public MachineState() { }
         public MachineState(string shortId, long number)
