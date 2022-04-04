@@ -13,6 +13,11 @@ namespace SDVFactory.Data.Components
         [JsonIgnore]
         public MachineState OutputMachine => FGame.Verse.MachineStates[OutputMachineNumber];
 
+        public Wire()
+        {
+            //deserialization
+        }
+
         public Wire(MachineState input, MachineState output)
         {
             if (input == null) throw new ArgumentNullException(nameof(input));

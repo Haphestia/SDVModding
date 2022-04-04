@@ -243,6 +243,7 @@ namespace SDVFactory.Data
                 //export power
                 if (state.PowerOutputBuffer > 0)
                 {
+                    List<MachineState> powerRecipients = new List<MachineState>();
                     List<(MachineState, Wire)> wiresToProcess = new List<(MachineState, Wire)>();
                     foreach(var wwww in FGame.Verse.Wires.Where(w => w.IsOutputMachine(state))){
                         wiresToProcess.Add((state, wwww));
@@ -263,14 +264,25 @@ namespace SDVFactory.Data
                         }
                         else if (!om.IsPowerInputBufferFull)
                         {
-                            int freespace = om.PowerInputBufferFreeSpace;
-                            int transferAmount = Math.Min(freespace, Math.Min(state.PowerOutputBuffer, PowerOutputRatePerMinute));
-                            state.PowerOutputBuffer -= transferAmount;
-                            om.PowerInputBuffer += transferAmount;
+                            powerRecipients.Add(om);
                         }
                     }
+                    //distribute power evenly
+                    int transferAmount = Math.Min(state.PowerOutputBuffer, PowerOutputRatePerMinute);
+                    int totalTransferAmount = 0;
+                    for (int iii = powerRecipients.Count - 1; iii >= 0; iii--)
+                    {
+                        var pr = powerRecipients[iii];
+                        int powerShare = (int)Math.Max(1, Math.Floor((float)transferAmount / powerRecipients.Count));
+                        powerRecipients.RemoveAt(iii);
+                        int freespace = pr.PowerInputBufferFreeSpace;
+                        int txAmount = Math.Min(freespace, powerShare);
+                        pr.PowerInputBuffer += txAmount;
+                        totalTransferAmount += txAmount;
+                        transferAmount -= txAmount;
+                    }
+                    state.PowerOutputBuffer -= totalTransferAmount;
                 }
-                //todo: distribute power evenly
             }
         }
 
