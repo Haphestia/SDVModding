@@ -66,7 +66,8 @@ namespace MinecartPatcher
 				if(counter >= startCount && counter <= endCount) responses.Add(new Response(mc.Key, mc.Value.DisplayName));
 
 			}
-			PageCount = counter / 4;
+			PageCount = counter / 5;
+			if (counter % 5 > 0) PageCount += 1;
 			if (page < PageCount - 1) responses.Add(new Response("MCP.PaginationPlus", "Next Page >"));
 			responses.Add(new Response("Cancel", Game1.content.LoadString("Strings\\Locations:MineCart_Destination_Cancel")));
 			LastPage = page;
