@@ -98,7 +98,7 @@ namespace MinecartPatcher
 		public MinecartInstance FindMinecart(GameLocation l, Vector2 vec)
         {
 			if (l == null || string.IsNullOrWhiteSpace(l.Name)) return null;
-            var tids = new List<int>{ 958, 1080, 1081 };
+            var tids = new List<int>{ 958, 1080, 1081, 179, 195, 208, 224 };
             int tid = l.getTileIndexAt(Utility.Vector2ToPoint(vec), "Buildings");
             if (tids.Contains(tid))
             {
