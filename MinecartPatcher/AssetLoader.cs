@@ -1,13 +1,14 @@
-﻿using StardewModdingAPI;
+﻿using StardewModdingAPI.Events;
 using StardewValley;
 using System.Collections.Generic;
 
 namespace MinecartPatcher
 {
-    internal class AssetLoader : IAssetLoader
+    internal class AssetLoader
     {
-        public bool CanLoad<T>(IAssetInfo asset) => asset.AssetNameEquals("MinecartPatcher.Minecarts");
-        public T Load<T>(IAssetInfo asset)
+        public bool CanLoad<T>(AssetReadyEventArgs asset) => asset.Name.IsEquivalentTo("MinecartPatcher.Minecarts");
+
+        public T Load<T>()
         {
             return (T)(object)new Dictionary<string, MinecartInstance>()
             {

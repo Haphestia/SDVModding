@@ -16,14 +16,14 @@ namespace MinecartPatcher
 
 		public override void Entry(IModHelper helper)
         {
-			helper.Content.AssetLoaders.Add(new AssetLoader());
+			helper.Events.Content.AssetReady += (sender, e) => new AssetLoader();
 			new MCPModHooks(this);
 			helper.Events.GameLoop.DayStarted += (obj, dsea) => LoadData();
 		}
 
 		public void LoadData()
         {
-			Minecarts = Helper.Content.Load<Dictionary<string, MinecartInstance>>("MinecartPatcher.Minecarts", ContentSource.GameContent);
+			Minecarts = Helper.GameContent.Load<Dictionary<string, MinecartInstance>>("MinecartPatcher.Minecarts");
 		}
 
         public bool OnMinecartActivation(MinecartInstance mc, GameLocation l, Vector2 vec)
@@ -49,7 +49,7 @@ namespace MinecartPatcher
 		{
 			LoadData();
 			List<Response> responses = new List<Response>();
-			if(page > 0) responses.Add(new Response("MCP.PaginationMinus", "@ Previous Page"));
+			if(page > 0) responses.Add(new Response("MCP.PaginationMinus", Helper.Translation.Get("previous")));
 			int counter = 0;
 			int startCount = (page * 4) + 2;
 			if (page == 0) startCount -= 2;
@@ -69,7 +69,7 @@ namespace MinecartPatcher
 			}
 			PageCount = counter / 5;
 			if (counter % 5 > 0) PageCount += 1;
-			if (page < PageCount - 1) responses.Add(new Response("MCP.PaginationPlus", "Next Page >"));
+			if (page < PageCount - 1) responses.Add(new Response("MCP.PaginationPlus", Helper.Translation.Get("next")));
 			responses.Add(new Response("Cancel", Game1.content.LoadString("Strings\\Locations:MineCart_Destination_Cancel")));
 			LastPage = page;
 			Game1.activeClickableMenu = new DialogueBox(src, this, responses);
