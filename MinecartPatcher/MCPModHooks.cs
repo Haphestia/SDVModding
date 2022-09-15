@@ -39,7 +39,15 @@ namespace MinecartPatcher
 
 		public override void OnGame1_UpdateControlInput(ref KeyboardState keyboardState, ref MouseState mouseState, ref GamePadState gamePadState, Action action)
 		{
-			alias.OnGame1_UpdateControlInput(ref keyboardState, ref mouseState, ref gamePadState, action);
+			try
+			{
+				alias.OnGame1_UpdateControlInput(ref keyboardState, ref mouseState, ref gamePadState, action);
+			}
+
+			catch (Exception ex)
+			{
+				modEntry.Monitor.Log($"Exception happened: {ex.Message}.\nIt may not be critical.", StardewModdingAPI.LogLevel.Warn);
+			}
 		}
 
 		public override void OnGameLocation_ResetForPlayerEntry(GameLocation location, Action action)
