@@ -6,7 +6,7 @@ namespace MinecartPatcher
 {
     internal class AssetLoader : IAssetLoader
     {
-        public bool CanLoad<T>(IAssetInfo asset) => asset.AssetNameEquals("MinecartPatcher.Minecarts");
+        public bool CanLoad<T>(IAssetInfo asset) => asset.Name.IsEquivalentTo("MinecartPatcher.Minecarts");
         public T Load<T>(IAssetInfo asset)
         {
             return (T)(object)new Dictionary<string, MinecartInstance>()
