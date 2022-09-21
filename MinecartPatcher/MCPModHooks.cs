@@ -9,16 +9,16 @@ using xTile.Dimensions;
 
 namespace MinecartPatcher
 {
-    public class MCPModHooks : ModHooks
-    {
+	public class MCPModHooks : ModHooks
+	{
 		ModHooks alias;
 		ModEntry modEntry;
 
 		public MCPModHooks(ModEntry mod)
-        {
+		{
 			modEntry = mod;
 			var field = typeof(Game1).GetField("hooks", BindingFlags.Static | BindingFlags.NonPublic);
-			alias = (ModHooks) field.GetValue(null);
+			alias = (ModHooks)field.GetValue(null);
 			field.SetValue(null, this);
 		}
 
@@ -51,10 +51,10 @@ namespace MinecartPatcher
 		{
 			var mc = modEntry.FindMinecart(location, new Vector2(tileLocation.X, tileLocation.Y));
 			if (mc != null)
-            {
+			{
 				modEntry.OnMinecartActivation(mc, location, new Vector2(tileLocation.X, tileLocation.Y));
 				return true;
-            }
+			}
 			return alias.OnGameLocation_CheckAction(location, tileLocation, viewport, who, action);
 		}
 
@@ -64,7 +64,7 @@ namespace MinecartPatcher
 		}
 
 		public override Task StartTask(Task task, string id)
-		{ 
+		{
 			return alias.StartTask(task, id);
 		}
 

@@ -34,23 +34,23 @@
    
  ```
  {
-    "Format": "1.25.0",
-    "Changes": [
-        {
-            "Action": "EditData",
-            "Target": "JsonMinecarts.Minecarts",
-            "Entries": {
-                "morecarts.islandnorth": {
-                    "LocationName": "IslandNorth",
-                    "DisplayName": "Island North",
-                    "LandingPointX": 19,
-                    "LandingPointY": 13,
-                    "LandingPointDirection": 2,
-                    "IsUnderground": false
-                }
-            }
-        }
-    ]
+	"Format": "1.25.0",
+	"Changes": [
+		{
+			"Action": "EditData",
+			"Target": "JsonMinecarts.Minecarts",
+			"Entries": {
+				"morecarts.islandnorth": {
+					"LocationName": "IslandNorth",
+					"DisplayName": "Island North",
+					"LandingPointX": 19,
+					"LandingPointY": 13,
+					"LandingPointDirection": 2,
+					"IsUnderground": false
+				}
+			}
+		}
+	]
  }
  ```
  
