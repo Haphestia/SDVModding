@@ -130,7 +130,7 @@ namespace MinecartPatcher
             int pageSize = (page == 0) ? 5 : 4;
 
             // Handle the lack of a "next" option for the final page
-            if ((carts.Count - 2) % 4 == 0)
+            if (PageCount > 1 && ((carts.Count - 2) % 4 == 0))
             {
                 PageCount -= 1;
                 if (page + 1 == PageCount) pageSize += 1;
