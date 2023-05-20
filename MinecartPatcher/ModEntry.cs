@@ -106,34 +106,56 @@ namespace MinecartPatcher
 
 		public void drawMinecartDialogue(MinecartInstance src, GameLocation l, int page, bool finalPage)
 		{
-			LoadData();
-			List<Response> responses = new List<Response>();
-			if (page > 0) responses.Add(new Response("MCP.PaginationMinus", Helper.Translation.Get("previous")));
-			int counter = 0;
-			int startCount = (page * 4) + 2;
-			if (page == 0) startCount -= 2;
-			int endCount = ((page + 1) * 4) + 1;
-			if (finalPage) endCount++;
-			foreach (var mc in Minecarts.OrderBy(x => x.Value.DisplayName))
-			{
-				if (mc.Value.NetworkId != src.NetworkId) continue;
-				if (mc.Value.LocationName == l.Name)
-				{
-					if (RawDistance(mc.Value.LandingPointX, mc.Value.LandingPointY, Game1.player.getTileX(), Game1.player.getTileY()) < 6) continue;
-				}
-				if (Game1.getLocationFromName(mc.Value.LocationName) == null) continue;
-				if (mc.Value.MailCondition != null && !Game1.MasterPlayer.mailReceived.Contains(mc.Value.MailCondition)) continue;
-				counter += 1;
-				if (counter >= startCount && counter <= endCount) responses.Add(new Response(mc.Key, mc.Value.DisplayName));
-			}
-			PageCount = counter / 5;
-			if (counter % 5 > 0) PageCount += 1;
-			if (page < PageCount - 1) responses.Add(new Response("MCP.PaginationPlus", Helper.Translation.Get("next")));
-			responses.Add(new Response("Cancel", Game1.content.LoadString("Strings\\Locations:MineCart_Destination_Cancel")));
-			LastPage = page;
-			Game1.activeClickableMenu = new DialogueBox(src, this, responses);
-			Game1.dialogueUp = true;
-			Game1.player.CanMove = false;
+            // Prepare the menu
+            LoadData();
+            List<Response> responses = new List<Response>();
+            List<Response> carts = new List<Response>();
+
+            // Acquire a list of all valid minecarts
+            foreach (var mc in Minecarts.OrderBy(x => x.Value.DisplayName))
+            {
+                if (mc.Value.NetworkId != src.NetworkId) continue;
+                if (mc.Value.LocationName == l.Name)
+                {
+                    if (RawDistance(mc.Value.LandingPointX, mc.Value.LandingPointY, Game1.player.getTileX(), Game1.player.getTileY()) < 6) continue;
+                }
+                if (Game1.getLocationFromName(mc.Value.LocationName) == null) continue;
+                if (mc.Value.MailCondition != null && !Game1.MasterPlayer.mailReceived.Contains(mc.Value.MailCondition)) continue;
+                carts.Add(new Response(mc.Key, mc.Value.DisplayName));
+            }
+
+            // Get the number of pages
+            int PageCount = (int)Math.Max(1, Math.Ceiling(((double)carts.Count - 1.0) / 4.0));
+            // Get the size of the current page
+            int pageSize = (page == 0) ? 5 : 4;
+
+            // Handle the lack of a "next" option for the final page
+            if ((carts.Count - 2) % 4 == 0)
+            {
+                PageCount -= 1;
+                if (page + 1 == PageCount) pageSize += 1;
+            }
+
+            // Add options to the page
+            if (page > 0) responses.Add(new Response("MCP.PaginationMinus", Helper.Translation.Get("previous")));
+
+            // Index handling to account for page one having an extra option
+            int baseIndex = (page * 4) + ((page == 0) ? 0 : 1);
+
+            for (int i = 0; i < pageSize && (i + baseIndex) < carts.Count; i++)
+            {
+                // Index handling for lopsided pages
+                responses.Add(carts[i + baseIndex]);
+            }
+
+            if (page < PageCount - 1) responses.Add(new Response("MCP.PaginationPlus", Helper.Translation.Get("next")));
+            responses.Add(new Response("Cancel", Game1.content.LoadString("Strings\\Locations:MineCart_Destination_Cancel")));
+
+            // Display the page
+            LastPage = page;
+            Game1.activeClickableMenu = new DialogueBox(src, this, responses);
+            Game1.dialogueUp = true;
+            Game1.player.CanMove = false;
 		}
 
 		public bool onDialogueSelect(MinecartInstance src, string key)
