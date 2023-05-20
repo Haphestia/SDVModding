@@ -125,7 +125,7 @@ namespace MinecartPatcher
             }
 
             // Get the number of pages
-            int PageCount = (int)Math.Max(1, Math.Ceiling(((double)carts.Count - 1.0) / 4.0));
+            PageCount = (int)Math.Max(1, Math.Ceiling(((double)carts.Count - 1.0) / 4.0));
             // Get the size of the current page
             int pageSize = (page == 0) ? 5 : 4;
 
